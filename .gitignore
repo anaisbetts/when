@@ -43,3 +43,4 @@ typings/
 out/
 .vscode/*
 .tmp
+lib/

@@ -16,7 +16,7 @@
     "pretty": true,
     "target": "es6",
     "jsx": "react",
-    "outDir": ".tmp/build"
+    "outDir": "lib"
   },
   "lib": ["dom", "es2015"],
   "formatCodeOptions": {
