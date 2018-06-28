@@ -1,6 +1,6 @@
 {
   "name": "@paulcbetts/wann",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "scripts": {
     "compile": "git clean -xdf ./lib && ../../node_modules/.bin/tsc -p . --outDir ./lib",
     "lint": "../../node_modules/.bin/tslint -c ./tslint.json -p ./tsconfig.json \"src/**/*.ts\"",
