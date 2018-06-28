@@ -11,6 +11,8 @@
     "url": "https://github.com/paulcbetts/wann/issues"
   },
   "scripts": {
+    "postinstall": "lerna bootstrap",
+    "test": "lerna run --parallel test"
   },
   "homepage": "https://github.com/paulcbetts/wann#readme",
   "devDependencies": {
