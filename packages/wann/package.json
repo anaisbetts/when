@@ -1,6 +1,6 @@
 {
   "name": "@paulcbetts/wann",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "scripts": {
     "compile": "tsc -p . --outDir ./lib",
     "lint": "../../node_modules/.bin/tslint -c ./tslint.json -p ./tsconfig.json \"src/**/*.ts\"",
