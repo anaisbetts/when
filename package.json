@@ -1,13 +1,6 @@
 {
   "name": "wann",
   "version": "0.0.1",
-  "scripts": {
-    "compile": "tsc",
-    "lint": "tslint -c ./tslint.json -p ./tsconfig.json \"src/**/*.ts\"",
-    "prepublish": "npm run compile",
-    "test": "npm run test-node && npm run lint",
-    "test-node": "mocha --compilers ts:ts-node/register \"./test/**/*-spec.ts\""
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/paulcbetts/wann.git"
@@ -18,16 +11,6 @@
     "url": "https://github.com/paulcbetts/wann/issues"
   },
   "homepage": "https://github.com/paulcbetts/wann#readme",
-  "main": "lib/src/index.js",
-  "typings": "lib/src/index.d.ts",
-  "dependencies": {
-    "debug": "3.1.0",
-    "lodash.isequal": "4.5.0",
-    "lodash.isfunction": "3.0.9",
-    "lodash.isobject": "3.0.2",
-    "lru-cache": "^4.1.3",
-    "rxjs": "^6.2.1"
-  },
   "devDependencies": {
     "@types/chai": "^4.1.4",
     "@types/chai-as-promised": "^7.1.0",
@@ -39,6 +22,7 @@
     "@types/mocha": "^5.2.2",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
+    "lerna": "^2.11.0",
     "mocha": "^5.2.0",
     "ts-node": "6.1.1",
     "tslint": "^5.10.0",

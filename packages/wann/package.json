@@ -1,8 +1,8 @@
 {
   "name": "@paulcbetts/wann",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
-    "compile": "tsc -p .",
+    "compile": "tsc -p . --outDir ./lib",
     "lint": "tslint -c ../../tslint.json -p ../../tsconfig.json \"src/**/*.ts\"",
     "prepublish": "npm run compile",
     "test": "npm run test-node && npm run lint",
