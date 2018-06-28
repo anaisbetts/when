@@ -2,7 +2,7 @@
   "name": "@paulcbetts/wann",
   "version": "0.0.4",
   "scripts": {
-    "compile": "git clean -xdf && tsc -p . --outDir ./lib",
+    "compile": "git clean -xdf ./lib && ../../node_modules/.bin/tsc -p . --outDir ./lib",
     "lint": "../../node_modules/.bin/tslint -c ./tslint.json -p ./tsconfig.json \"src/**/*.ts\"",
     "prepublish": "npm run compile",
     "test": "npm run test-node && npm run lint",
