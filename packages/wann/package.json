@@ -3,10 +3,10 @@
   "version": "0.0.2",
   "scripts": {
     "compile": "tsc -p . --outDir ./lib",
-    "lint": "tslint -c ../../tslint.json -p ../../tsconfig.json \"src/**/*.ts\"",
+    "lint": "../../node_modules/.bin/tslint -c ./tslint.json -p ./tsconfig.json \"src/**/*.ts\"",
     "prepublish": "npm run compile",
     "test": "npm run test-node && npm run lint",
-    "test-node": "mocha --compilers ts:ts-node/register \"./test/**/*-spec.ts\""
+    "test-node": "../../node_modules/.bin/mocha --compilers ts:ts-node/register \"./test/**/*-spec.ts\""
   },
   "repository": {
     "type": "git",
@@ -18,8 +18,8 @@
     "url": "https://github.com/paulcbetts/wann/issues"
   },
   "homepage": "https://github.com/paulcbetts/wann#readme",
-  "main": "lib/src/index.js",
-  "typings": "lib/src/index.d.ts",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
   "dependencies": {
     "debug": "3.1.0",
     "lodash.isequal": "4.5.0",
