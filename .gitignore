@@ -44,3 +44,4 @@ out/
 .vscode/*
 .tmp
 lib/
+packages/**/lib/
