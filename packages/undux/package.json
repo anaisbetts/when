@@ -1,0 +1,31 @@
+{
+  "name": "@whenjs/undux",
+  "version": "0.1.0",
+  "scripts": {
+    "compile": "git clean -xdf ./lib && ../../node_modules/.bin/tsc -p . --outDir ./lib",
+    "lint": "../../node_modules/.bin/tslint -c ./tslint.json -p ./tsconfig.json \"src/**/*.ts\"",
+    "prepublish": "npm run compile",
+    "test": "npm run test-node && npm run lint",
+    "test-node": "../../node_modules/.bin/mocha --compilers ts:ts-node/register \"./test/**/*-spec.ts\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paulcbetts/when.git"
+  },
+  "author": "Paul Betts",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/paulcbetts/when/issues"
+  },
+  "homepage": "https://github.com/paulcbetts/when#readme",
+  "main": "lib/src/index.js",
+  "typings": "lib/src/index.d.ts",
+  "dependencies": {
+    "debug": "3.1.0",
+    "rxjs": "^6.2.1",
+    "@whenjs/when": "^0.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
