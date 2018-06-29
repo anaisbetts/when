@@ -1,6 +1,6 @@
 {
   "name": "@whenjs/when",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "scripts": {
     "compile": "git clean -xdf ./lib && ../../node_modules/.bin/tsc -p . --outDir ./lib",
     "lint": "../../node_modules/.bin/tslint -c ./tslint.json -p ./tsconfig.json \"src/**/*.ts\"",
@@ -27,5 +27,8 @@
     "lodash.isobject": "3.0.2",
     "lru-cache": "^4.1.3",
     "rxjs": "^6.2.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
