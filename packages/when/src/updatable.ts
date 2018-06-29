@@ -4,7 +4,7 @@ import { take, takeWhile } from 'rxjs/operators';
 import * as debug from 'debug';
 import { captureStack } from './utils';
 
-const d = debug('wann:updatable');
+const d = debug('when:updatable');
 
 export type MergeStrategy = 'overwrite' | 'merge' | 'array';
 

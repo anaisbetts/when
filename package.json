@@ -1,20 +1,20 @@
 {
-  "name": "wann",
-  "version": "0.0.1",
+  "name": "@whenjs",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/paulcbetts/wann.git"
+    "url": "git+https://github.com/paulcbetts/when.git"
   },
   "author": "Paul Betts",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/paulcbetts/wann/issues"
+    "url": "https://github.com/paulcbetts/when/issues"
   },
   "scripts": {
     "postinstall": "lerna bootstrap",
     "test": "lerna run --parallel test"
   },
-  "homepage": "https://github.com/paulcbetts/wann#readme",
+  "homepage": "https://github.com/paulcbetts/when#readme",
   "devDependencies": {
     "@types/chai": "^4.1.4",
     "@types/chai-as-promised": "^7.1.0",

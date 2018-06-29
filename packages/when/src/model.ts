@@ -4,7 +4,7 @@ import * as debug from 'debug';
 // tslint:disable-next-line:no-require-imports
 import isEqual = require('lodash.isequal');
 
-const d = debug('wann:model');
+const d = debug('when:model');
 
 export interface ChangeNotification {
   sender: any;

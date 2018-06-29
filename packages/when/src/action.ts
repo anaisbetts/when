@@ -13,8 +13,8 @@ export interface ActionCtor<TRet> {
   new(func: any, initialValue: TRet): Action<TRet>;
 }
 
-const d = debug('wann:action');
-const dn = debug('wann-noisy:action');
+const d = debug('when:action');
+const dn = debug('when-noisy:action');
 
 export class Action<T> {
   private readonly executeFactory: CreateAsyncSelector<T>;

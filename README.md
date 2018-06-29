@@ -1,6 +1,6 @@
-# Wann: React to Changes to State Objects
+# When: React to Changes to State Objects
 
-Wann lets you listen to State objects (or really, any object you want!) and act based on when they change. The main function to do this is a function called `when`:
+When lets you listen to State objects (or really, any object you want!) and act based on when they change. The main function to do this is a function called `when`:
 
 ## when(object, selector): Observable
 
@@ -14,7 +14,7 @@ myCoolState.foo.bar = "baz";
 >>> myCoolState.foo.bar is baz
 ```
 
-Wann isn't fooled by intermediate objects, and automatically listens to the right one:
+When isn't fooled by intermediate objects, and automatically listens to the right one:
 
 ```js
 latestBar: Observable<string> = when(myCoolState, x => x.foo.bar);
@@ -36,7 +36,7 @@ myCoolState.foo.bar = "bamf";
 
 ## How can it do this?
 
-Wann isn't magic, it will try to detect different kinds of observable objects and subscribe to them, but you will probably have to make your main object a subclass of the `Model` class. This class doesn't do much other than allow you to provide an annotation `@notify` to describe properties that should notify when you change them.
+When isn't magic, it will try to detect different kinds of observable objects and subscribe to them, but you will probably have to make your main object a subclass of the `Model` class. This class doesn't do much other than allow you to provide an annotation `@notify` to describe properties that should notify when you change them.
 
 ```js
 @notify('toastCount')
