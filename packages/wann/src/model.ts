@@ -139,5 +139,3 @@ export function fromObservable(target: Model, propertyKey: string): void {
     },
   });
 }
-
-export interface WhenSelector<TRet> { (...vals: Array<any>): TRet; }
