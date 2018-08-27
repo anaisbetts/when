@@ -91,6 +91,30 @@ describe('The Updatable class', function() {
     expect(fixture.value).to.deep.equal({a: 5, b: 2});
   });
 
+  it('doesnt deep merge objects when used with the merge strategy', function() {
+    const fixture = new Updatable<Object>(() => of({a: 1}), 'merge');
+    expect(fixture.value).to.deep.equal({a: 1});
+
+    fixture.next({b: {c: 2}});
+    expect(fixture.value).to.deep.equal({a: 1, b: {c: 2}});
+
+    fixture.next({b: {d: 4}});
+    expect(fixture.value).to.deep.equal({a: 1, b: {d: 4}});
+  });
+
+  it('deep merges objects when used with the mergeDeep strategy', function() {
+    const fixture = new Updatable<Object>(() => of({a: 1}), 'mergeDeep');
+    expect(fixture.value).to.deep.equal({a: 1});
+
+    fixture.next({b: {c: 2}});
+    expect(fixture.value).to.deep.equal({a: 1, b: {c: 2}});
+
+    fixture.next({b: {d: 4}});
+    expect(fixture.value).to.deep.equal({a: 1, b: {c: 2, d: 4}});
+  });
+
+
+
   it('drops the current value on invalidate', function() {
     const fixture = new Updatable<Object>(() => of({a: 1}), 'merge');
     expect(fixture.value).to.deep.equal({a: 1});

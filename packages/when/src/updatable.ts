@@ -2,11 +2,13 @@ import { from, Observable, Subject, Subscriber, Subscription, SubscriptionLike a
 import { take, takeWhile } from 'rxjs/operators';
 
 import * as debug from 'debug';
+import * as deepMerge from 'deepmerge';
+
 import { captureStack } from './utils';
 
 const d = debug('when:updatable');
 
-export type MergeStrategy = 'overwrite' | 'merge' | 'array';
+export type MergeStrategy = 'overwrite' | 'merge' | 'mergeDeep';
 
 export class Updatable<T> extends Subject<T> {
   protected _value: T;
@@ -36,6 +38,9 @@ export class Updatable<T> extends Subject<T> {
       break;
     case 'merge':
       this.next = this.nextMerge;
+      break;
+    case 'mergeDeep':
+      this.next = this.nextMergeDeep;
       break;
     default:
       throw new Error('Unknown merge strategy');
@@ -112,6 +117,26 @@ export class Updatable<T> extends Subject<T> {
 
     super.next(this._value);
   }
+
+  protected nextMergeDeep(value: T): void {
+    if (value === undefined) {
+      d(`Updatable with merge strategy received undefined, this is probably a bug\n${captureStack()}`);
+      return;
+    }
+
+    this._hasPendingValue = true;
+    this._hasValue = true;
+
+    if (this._value) {
+      this._value = deepMerge(this._value || {}, value || {});
+    } else {
+      this._value = value;
+    }
+
+    super.next(this._value);
+  }
+
+
 
   error(error: any) {
     d(`Updatable threw error: ${error.message}\nCurrent value is ${JSON.stringify(this._value)}\n${error.stack}`);

@@ -19,6 +19,7 @@
     "@types/chai": "^4.1.4",
     "@types/chai-as-promised": "^7.1.0",
     "@types/debug": "0.0.30",
+    "@types/deepmerge": "^2.1.0",
     "@types/lodash.isequal": "^4.5.2",
     "@types/lodash.isfunction": "^3.0.3",
     "@types/lodash.isobject": "^3.0.3",
@@ -31,5 +32,8 @@
     "ts-node": "6.1.1",
     "tslint": "^5.10.0",
     "typescript": "2.9.2"
+  },
+  "dependencies": {
+    "deepmerge": "^2.1.1"
   }
 }
