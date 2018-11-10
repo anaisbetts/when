@@ -2,11 +2,11 @@
   "name": "@whenjs/when",
   "version": "0.2.1",
   "scripts": {
-    "compile": "git clean -xdf ./lib && ../../node_modules/.bin/tsc -p . --outDir ./lib",
-    "lint": "../../node_modules/.bin/tslint -c ./tslint.json -p ./tsconfig.json \"src/**/*.ts\"",
+    "compile": "git clean -xdf ./lib && \"../../node_modules/.bin/tsc\" -p . --outDir ./lib",
+    "lint": "echo '' && \"../../node_modules/.bin/tslint\" -c ./tslint.json -p ./tsconfig.json \"src/**/*.ts\"",
     "prepublish": "npm run compile",
     "test": "npm run test-node && npm run lint",
-    "test-node": "../../node_modules/.bin/mocha --compilers ts:ts-node/register \"./test/**/*-spec.ts\""
+    "test-node": "echo '' && \"../../node_modules/.bin/mocha\" --compilers ts:ts-node/register \"./test/**/*-spec.ts\""
   },
   "repository": {
     "type": "git",
