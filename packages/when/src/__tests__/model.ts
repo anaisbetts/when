@@ -1,9 +1,9 @@
 import { merge } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { expect, TestClass } from './support';
+import { TestClass } from './support';
 
-import { createCollection } from '../src/custom-operators';
+import { createCollection } from '../custom-operators';
 
 describe('the notify attribute', function() {
   it('should notify me!', function() {
@@ -14,26 +14,26 @@ describe('the notify attribute', function() {
       fixture.changed.pipe(map((x) => ({ changing: false, name: x.property }))),
     ));
 
-    expect(result.length).to.equal(0);
+    expect(result.length).toBe(0);
 
     fixture.foo = 5;
-    expect(result.length).to.equal(2);
-    expect(result[0]).to.deep.equal({ changing: true, name: 'foo' });
-    expect(result[1]).to.deep.equal({ changing: false, name: 'foo' });
+    expect(result.length).toBe(2);
+    expect(result[0]).toEqual({ changing: true, name: 'foo' });
+    expect(result[1]).toEqual({ changing: false, name: 'foo' });
 
     fixture.foo = 5;
-    expect(result.length).to.equal(2);
+    expect(result.length).toBe(2);
 
     fixture.foo = 7;
-    expect(result.length).to.equal(4);
-    expect(result[2]).to.deep.equal({ changing: true, name: 'foo' });
-    expect(result[3]).to.deep.equal({ changing: false, name: 'foo' });
+    expect(result.length).toBe(4);
+    expect(result[2]).toEqual({ changing: true, name: 'foo' });
+    expect(result[3]).toEqual({ changing: false, name: 'foo' });
 
     fixture.baz = 7;
-    expect(result.length).to.equal(4);
+    expect(result.length).toBe(4);
 
     fixture.bar = 7;
-    expect(result.length).to.equal(6);
+    expect(result.length).toBe(6);
   });
 });
 
@@ -41,24 +41,24 @@ describe('the toProperty method', function() {
   it('should return a canned value', function() {
     const fixture = new TestClass();
 
-    expect(fixture.derived).to.equal(42);
+    expect(fixture.derived).toBe(42);
   });
 
   it('should notify on changes', function() {
     const fixture = new TestClass();
-    expect(fixture.subjectDerived).to.equal(0);
+    expect(fixture.subjectDerived).toBe(0);
 
     const changes = createCollection(merge(
       fixture.changing.pipe(map((x) => ({ changing: true, name: x.property }))),
       fixture.changed.pipe(map((x) => ({ changing: false, name: x.property }))),
     ));
 
-    expect(changes.length).to.equal(0);
+    expect(changes.length).toBe(0);
 
     fixture.someSubject.next(10);
-    expect(fixture.subjectDerived).to.equal(100);
-    expect(changes[0]).to.deep.equal({ changing: true, name: 'subjectDerived' });
-    expect(changes[1]).to.deep.equal({ changing: false, name: 'subjectDerived' });
+    expect(fixture.subjectDerived).toBe(100);
+    expect(changes[0]).toEqual({ changing: true, name: 'subjectDerived' });
+    expect(changes[1]).toEqual({ changing: false, name: 'subjectDerived' });
   });
 });
 

@@ -6,7 +6,7 @@
     "lint": "echo '' && \"../../node_modules/.bin/tslint\" -c ./tslint.json -p ./tsconfig.json \"src/**/*.ts\"",
     "prepublish": "npm run compile",
     "test": "npm run test-node && npm run lint",
-    "test-node": "echo '' && \"../../node_modules/.bin/mocha\" --compilers ts:ts-node/register \"./test/**/*-spec.ts\""
+    "test-node": "echo '' && \"../../node_modules/.bin/jest\""
   },
   "repository": {
     "type": "git",
@@ -31,5 +31,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "jest": "^23.6.0"
   }
 }
