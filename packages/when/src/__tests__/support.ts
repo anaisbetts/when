@@ -1,16 +1,8 @@
 import { of, Subject } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { fromObservable, Model, notify } from '../src/model';
-import { Updatable } from '../src/updatable';
-
-import * as chai from 'chai';
-import * as chaiAsPromised from 'chai-as-promised';
-
-chai.should();
-chai.use(chaiAsPromised);
-
-export const { expect } = chai;
+import { fromObservable, Model, notify } from '../model';
+import { Updatable } from '../updatable';
 
 @notify('foo', 'bar', 'arrayFoo')
 export class TestClass extends Model {
@@ -44,3 +36,16 @@ export class TestClass extends Model {
     );
   }
 }
+
+function delay(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+describe('The test runner', function() {
+  it('should pass this test', async function() {
+    await delay(1000);
+    expect(true).toBeTruthy();
+  });
+});

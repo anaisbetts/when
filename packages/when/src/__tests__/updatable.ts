@@ -1,21 +1,19 @@
 import { of, Subject } from 'rxjs';
-import { Updatable } from '../src/updatable';
-
-import { expect } from './support';
+import { Updatable } from '../updatable';
 
 describe('The Updatable class', function() {
   it('mostly acts like a BehaviorSubject', function() {
     let fixture = new Updatable(() => of(42));
-    expect(fixture.value).to.equal(42);
+    expect(fixture.value).toEqual(42);
 
     let result = -1;
     fixture.subscribe(x => result = x);
-    expect(result).to.equal(42);
+    expect(result).toEqual(42);
 
     fixture = new Updatable(() => of(42));
     result = -1;
     fixture.subscribe(x => result = x);
-    expect(result).to.equal(42);
+    expect(result).toEqual(42);
   });
 
   it('blows up when we trash it', function() {
@@ -25,15 +23,15 @@ describe('The Updatable class', function() {
     let error = null;
     // tslint:disable-next-line:no-empty
     fixture.subscribe(() => {}, (e) => error = e);
-    expect(error).not.to.be.ok;
+    expect(error).toBeFalsy();
 
     input.error(new Error('Die'));
-    expect(error).to.be.ok;
+    expect(error).toBeTruthy();
 
     error = null;
     // tslint:disable-next-line:no-empty
     fixture.subscribe(() => {}, (e) => error = e);
-    expect(error).to.be.ok;
+    expect(error).toBeTruthy();
 
     input = new Subject();
     fixture = new Updatable(() => input);
@@ -41,10 +39,10 @@ describe('The Updatable class', function() {
     error = null;
     // tslint:disable-next-line:no-empty
     fixture.subscribe(() => {}, (e) => error = e);
-    expect(error).not.to.be.ok;
+    expect(error).toBeFalsy();
 
     fixture.error(new Error('Die'));
-    expect(error).to.be.ok;
+    expect(error).toBeTruthy();
   });
 
   it('calls the factory input but replays it', function() {
@@ -54,21 +52,21 @@ describe('The Updatable class', function() {
     let value = -1;
     const sub = fixture.subscribe(x => value = x);
 
-    expect(value).to.equal(-1);
+    expect(value).toEqual(-1);
 
     input.next(42);
     input.complete();
     sub.unsubscribe();
-    expect(value).to.equal(42);
+    expect(value).toEqual(42);
 
     value = -1;
     fixture.subscribe(x => value = x).unsubscribe();
-    expect(value).to.equal(42);
+    expect(value).toEqual(42);
 
     value = -1;
     fixture.subscribe(x => value = x);
     fixture.next(50);
-    expect(value).to.equal(50);
+    expect(value).toEqual(50);
   });
 
   it("doesn't reset once next is called", function() {
@@ -77,71 +75,71 @@ describe('The Updatable class', function() {
 
     let latest = 0;
     fixture.subscribe(x => latest = x);
-    expect(latest).to.equal(42);
+    expect(latest).toEqual(42);
   });
 
   it('shallow merges objects when used with the merge strategy', function() {
     const fixture = new Updatable<Object>(() => of({a: 1}), 'merge');
-    expect(fixture.value).to.deep.equal({a: 1});
+    expect(fixture.value).toEqual({a: 1});
 
     fixture.next({b: 2});
-    expect(fixture.value).to.deep.equal({a: 1, b: 2});
+    expect(fixture.value).toEqual({a: 1, b: 2});
 
     fixture.next({a: 5});
-    expect(fixture.value).to.deep.equal({a: 5, b: 2});
+    expect(fixture.value).toEqual({a: 5, b: 2});
   });
 
   it('doesnt deep merge objects when used with the merge strategy', function() {
     const fixture = new Updatable<Object>(() => of({a: 1}), 'merge');
-    expect(fixture.value).to.deep.equal({a: 1});
+    expect(fixture.value).toEqual({a: 1});
 
     fixture.next({b: {c: 2}});
-    expect(fixture.value).to.deep.equal({a: 1, b: {c: 2}});
+    expect(fixture.value).toEqual({a: 1, b: {c: 2}});
 
     fixture.next({b: {d: 4}});
-    expect(fixture.value).to.deep.equal({a: 1, b: {d: 4}});
+    expect(fixture.value).toEqual({a: 1, b: {d: 4}});
   });
 
   it('deep merges objects when used with the mergeDeep strategy', function() {
     const fixture = new Updatable<Object>(() => of({a: 1}), 'mergeDeep');
-    expect(fixture.value).to.deep.equal({a: 1});
+    expect(fixture.value).toEqual({a: 1});
 
     fixture.next({b: {c: 2}});
-    expect(fixture.value).to.deep.equal({a: 1, b: {c: 2}});
+    expect(fixture.value).toEqual({a: 1, b: {c: 2}});
 
     fixture.next({b: {d: 4}});
-    expect(fixture.value).to.deep.equal({a: 1, b: {c: 2, d: 4}});
+    expect(fixture.value).toEqual({a: 1, b: {c: 2, d: 4}});
   });
 
 
 
   it('drops the current value on invalidate', function() {
     const fixture = new Updatable<Object>(() => of({a: 1}), 'merge');
-    expect(fixture.value).to.deep.equal({a: 1});
+    expect(fixture.value).toEqual({a: 1});
 
     fixture.next({b: 2});
-    expect(fixture.value).to.deep.equal({a: 1, b: 2});
+    expect(fixture.value).toEqual({a: 1, b: 2});
 
     fixture.next({a: 5});
-    expect(fixture.value).to.deep.equal({a: 5, b: 2});
+    expect(fixture.value).toEqual({a: 5, b: 2});
 
     fixture.invalidate();
-    expect(fixture.value).to.deep.equal({a: 1});
+    expect(fixture.value).toEqual({a: 1});
   });
 
   it('should execute onrelease handler', function() {
     let isReleased = false;
     const fixture = new Updatable<Object>(() => of({a: 1}), 'merge', () => isReleased = true);
-    expect(isReleased).to.equal(false);
+    expect(isReleased).toEqual(false);
 
     const disp1 = fixture.subscribe();
-    expect(isReleased).to.equal(false);
+    expect(isReleased).toEqual(false);
     const disp2 = fixture.subscribe();
-    expect(isReleased).to.equal(false);
+    expect(isReleased).toEqual(false);
 
     disp2.unsubscribe();
-    expect(isReleased).to.equal(false);
+    expect(isReleased).toEqual(false);
     disp1.unsubscribe();
-    expect(isReleased).to.equal(true);
+    expect(isReleased).toEqual(true);
   });
 });

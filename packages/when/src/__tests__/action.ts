@@ -1,17 +1,16 @@
 import { Subject, throwError } from 'rxjs';
-import { expect } from './support';
 
-import { Action } from '../src/action';
-import { createCollection } from '../src/custom-operators';
+import { Action } from '../action';
+import { createCollection } from '../custom-operators';
 
 describe('the Action class', function() {
   it('should call the factory function', function() {
     let die = true;
     const fixture = Action.create(() => die = false, true);
-    expect(die).to.be.ok;
+    expect(die).toBeTruthy();
 
     fixture.execute();
-    expect(die).not.to.be.ok;
+    expect(die).toBeFalsy();
   });
 
   it('should signal a result', function() {
@@ -19,11 +18,11 @@ describe('the Action class', function() {
     const fixture = Action.create(() => die = false, true);
     const result: boolean[] = createCollection(fixture.result);
 
-    expect(result.length).to.equal(1);
+    expect(result.length).toEqual(1);
 
     fixture.execute();
-    expect(result.length).to.equal(2);
-    expect(die).to.equal(false);
+    expect(result.length).toEqual(2);
+    expect(die).toEqual(false);
   });
 
   it('should pipe errors to thrownErrors', function() {
@@ -31,14 +30,14 @@ describe('the Action class', function() {
     const result: Error[] = createCollection(fixture.thrownErrors);
 
     let err = null;
-    expect(result.length).to.equal(0);
-    expect(err).to.equal(null);
+    expect(result.length).toEqual(0);
+    expect(err).toEqual(null);
 
     // tslint:disable-next-line:no-empty
     fixture.execute().subscribe(_ => {}, (e) => err = e);
 
-    expect(err).to.be.ok;
-    expect(result.length).to.equal(1);
+    expect(err).toBeTruthy();
+    expect(result.length).toEqual(1);
   });
 
   it('should report isExecuting correctly', function() {
@@ -46,31 +45,31 @@ describe('the Action class', function() {
     const fixture = Action.createAsync<boolean>(() => input, true);
     const result1: boolean[] = createCollection(fixture.result);
 
-    expect(fixture.isExecuting).not.to.be.ok;
-    expect(result1.length).to.equal(1);
+    expect(fixture.isExecuting).toBeFalsy();
+    expect(result1.length).toEqual(1);
 
     // Undo result being a BehaviorSubject
     result1.pop();
 
     const result2 = createCollection(fixture.execute());
-    expect(result1).to.deep.equal(result2);
-    expect(result1.length).to.equal(0);
-    expect(fixture.isExecuting).to.be.ok;
+    expect(result1).toEqual(result2);
+    expect(result1.length).toEqual(0);
+    expect(fixture.isExecuting).toBeTruthy();
 
     input.next(false);
-    expect(result1).to.deep.equal(result2);
-    expect(result1.length).to.equal(1);
-    expect(fixture.isExecuting).to.be.ok;
+    expect(result1).toEqual(result2);
+    expect(result1.length).toEqual(1);
+    expect(fixture.isExecuting).toBeTruthy();
 
     input.next(true);
-    expect(result1).to.deep.equal(result2);
-    expect(result1.length).to.equal(2);
-    expect(fixture.isExecuting).to.be.ok;
+    expect(result1).toEqual(result2);
+    expect(result1.length).toEqual(2);
+    expect(fixture.isExecuting).toBeTruthy();
 
     input.complete();
-    expect(result1).to.deep.equal(result2);
-    expect(result1.length).to.equal(2);
-    expect(fixture.isExecuting).not.to.be.ok;
+    expect(result1).toEqual(result2);
+    expect(result1.length).toEqual(2);
+    expect(fixture.isExecuting).toBeFalsy();
   });
 
   it('should dedupe calls to execute', function() {
@@ -80,20 +79,20 @@ describe('the Action class', function() {
     const fixture = Action.createAsync<boolean>(() => { callCount++; return input; }, true);
     const result: boolean[] = createCollection(fixture.result);
 
-    expect(fixture.isExecuting).not.to.be.ok;
-    expect(result.length).to.equal(1);
-    expect(callCount).to.equal(0);
+    expect(fixture.isExecuting).toBeFalsy();
+    expect(result.length).toEqual(1);
+    expect(callCount).toEqual(0);
 
     fixture.execute();
-    expect(callCount).to.equal(1);
+    expect(callCount).toEqual(1);
 
     fixture.execute();
-    expect(callCount).to.equal(1);
+    expect(callCount).toEqual(1);
 
     input.complete();
-    expect(callCount).to.equal(1);
+    expect(callCount).toEqual(1);
 
     fixture.execute();
-    expect(callCount).to.equal(2);
+    expect(callCount).toEqual(2);
   });
 });
