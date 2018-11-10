@@ -110,7 +110,7 @@ export class Updatable<T> extends Subject<T> {
     this._hasValue = true;
 
     if (this._value) {
-      this._value = Object.assign({}, this._value || {}, value || {});
+      this._value = <T>Object.assign({}, this._value || {}, value || {});
     } else {
       this._value = value;
     }

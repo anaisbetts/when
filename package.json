@@ -16,24 +16,24 @@
   },
   "homepage": "https://github.com/paulcbetts/when#readme",
   "devDependencies": {
-    "@types/chai": "^4.1.4",
+    "@types/chai": "^4.1.7",
     "@types/chai-as-promised": "^7.1.0",
-    "@types/debug": "0.0.30",
-    "@types/deepmerge": "^2.1.0",
-    "@types/lodash.isequal": "^4.5.2",
-    "@types/lodash.isfunction": "^3.0.3",
-    "@types/lodash.isobject": "^3.0.3",
+    "@types/debug": "0.0.31",
+    "@types/deepmerge": "^2.2.0",
+    "@types/lodash.isequal": "^4.5.3",
+    "@types/lodash.isfunction": "^3.0.4",
+    "@types/lodash.isobject": "^3.0.4",
     "@types/lru-cache": "4.1.1",
-    "@types/mocha": "^5.2.2",
-    "chai": "^4.1.2",
+    "@types/mocha": "^5.2.5",
+    "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
-    "lerna": "^2.11.0",
+    "lerna": "^3.4.3",
     "mocha": "^5.2.0",
-    "ts-node": "6.1.1",
-    "tslint": "^5.10.0",
-    "typescript": "2.9.2"
+    "ts-node": "7.0.1",
+    "tslint": "^5.11.0",
+    "typescript": "3.1.6"
   },
   "dependencies": {
-    "deepmerge": "^2.1.1"
+    "deepmerge": "^2.2.1"
   }
 }

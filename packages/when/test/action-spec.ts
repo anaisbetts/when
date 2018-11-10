@@ -23,6 +23,7 @@ describe('the Action class', function() {
 
     fixture.execute();
     expect(result.length).to.equal(2);
+    expect(die).to.equal(false);
   });
 
   it('should pipe errors to thrownErrors', function() {
