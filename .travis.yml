@@ -9,7 +9,7 @@ node_js:
 install:
   - cd ./packages/when && npm ci
 script:
-  - cd ./packages/when && npm t
+  - npm t
 cache:
   directories:
   - "$HOME/.npm"
