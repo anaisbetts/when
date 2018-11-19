@@ -3,10 +3,10 @@
   "version": "0.2.1",
   "scripts": {
     "compile": "git clean -xdf ./lib && tsc -p . --outDir ./lib",
-    "lint": "echo '' && tslint -c ./tslint.json -p ./tsconfig.json \"src/**/*.ts\"",
+    "lint": "tslint -c ./tslint.json -p ./tsconfig.json \"src/**/*.ts\"",
     "prepublish": "npm run compile",
     "test": "npm run test-node && npm run lint",
-    "test-node": "jest"
+    "test-node": "jest ./src"
   },
   "repository": {
     "type": "git",
