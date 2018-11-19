@@ -5,8 +5,11 @@ notifications:
   email: false
 language: node_js
 node_js:
-  - 9
+  - 10
 install:
-  - npm i
+  - cd ./packages/when && npm ci
 script:
   - npm t
+cache:
+  directories:
+  - "$HOME/.npm"
