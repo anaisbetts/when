@@ -5,8 +5,8 @@ notifications:
   email: false
 language: node_js
 node_js:
-  - 9
+  - 10
 install:
-  - cd ./packages/when && npm i
+  - cd ./packages/when && npm ci
 script:
   - cd ./packages/when && npm t
