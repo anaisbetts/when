@@ -7,6 +7,6 @@ language: node_js
 node_js:
   - 9
 install:
-  - npm i
+  - cd ./packages/when && npm i
 script:
-  - npm t
+  - cd ./packages/when && npm t
