@@ -18,8 +18,8 @@
     "url": "https://github.com/paulcbetts/when/issues"
   },
   "homepage": "https://github.com/paulcbetts/when#readme",
-  "main": "lib/src/index.js",
-  "typings": "lib/src/index.d.ts",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
   "dependencies": {
     "debug": "4.1.0",
     "deepmerge": "^2.2.1",
