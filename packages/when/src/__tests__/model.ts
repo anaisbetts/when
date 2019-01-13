@@ -7,7 +7,7 @@ import { TestClass } from './support';
 
 import { createCollection } from '../custom-operators';
 
-describe('the notify method', function() {
+describe('the propertyShouldNotify method', function() {
   it('should notify me!', function() {
     const fixture = new TestClass();
 
