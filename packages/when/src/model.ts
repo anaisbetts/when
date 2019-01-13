@@ -29,6 +29,24 @@ export class Model {
     this.innerDisp = new Subscription();
   }
 
+  notify(...properties: Array<string>) {
+    const proto = Object.getPrototypeOf(this);
+    if (proto.__notifySetUp__) {
+      return;
+    }
+
+    for (const prop of properties) {
+      const descriptorList = getDescriptorsForProperty(
+        prop, { configurable: true, enumerable: true });
+
+      for (const k of Object.keys(descriptorList)) {
+        Object.defineProperty(proto, k, descriptorList[k]);
+      }
+    }
+
+    proto.__notifySetUp__ = true;
+  }
+
   toProperty<T>(input: Observable<T>, propertyKey: string) {
     const obsPropertyKey: string = `___${propertyKey}_Observable`;
 
@@ -80,19 +98,6 @@ function getDescriptorsForProperty(name: string, descriptor: PropertyDescriptor)
   ret[backingStoreName] = backingStoreProp;
 
   return ret;
-}
-
-export function notify(...properties: Array<string>) {
-  return (target: Function) => {
-    for (const prop of properties) {
-      const descriptorList = getDescriptorsForProperty(
-        prop, { configurable: true, enumerable: true });
-
-      for (const k of Object.keys(descriptorList)) {
-        Object.defineProperty(target.prototype, k, descriptorList[k]);
-      }
-    }
-  };
 }
 
 function enablePropertyAsObservable(target: Model, propertyKey: string): void {

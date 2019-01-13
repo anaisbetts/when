@@ -1,10 +1,9 @@
 import { of, Subject } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { Model, notify } from '../model';
+import { Model } from '../model';
 import { Updatable } from '../updatable';
 
-@notify('foo', 'bar', 'arrayFoo')
 export class TestClass extends Model {
   someSubject: Subject<number>;
   foo: number;
@@ -25,6 +24,8 @@ export class TestClass extends Model {
     this.arrayFoo = [1];
     this.updatableFoo = new Updatable(() => of(6));
     this.someSubject = new Subject();
+
+    this.notify('foo', 'bar', 'arrayFoo');
 
     this.toProperty(of(42), 'derived');
 
