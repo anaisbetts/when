@@ -36,13 +36,16 @@ myCoolState.foo.bar = "bamf";
 
 ## How can it do this?
 
-When isn't magic, it will try to detect different kinds of observable objects and subscribe to them, but you will probably have to make your main object a subclass of the `Model` class. This class doesn't do much other than allow you to provide an annotation `@notify` to describe properties that should notify when you change them.
+When isn't magic, it will try to detect different kinds of observable objects and subscribe to them, but you will probably have to make your main object a subclass of the `Model` class. This class doesn't do much other than allow you to provide a list of properties that should notify when you change them.
 
 ```js
-@notify('toastCount')
 class Toaster : Model {
   toastCount: int;
   brandName: string;
+
+  constructor() {
+    this.propertyShouldNotify('toastCount');
+  }
 }
 
 // Observing properties with @notify == works!

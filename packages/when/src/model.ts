@@ -29,11 +29,32 @@ export class Model {
     this.innerDisp = new Subscription();
   }
 
+  propertyShouldNotify(...properties: Array<string>) {
+    const proto = Object.getPrototypeOf(this);
+    if (proto.__notifySetUp__) {
+      return;
+    }
+
+    for (const prop of properties) {
+      const descriptorList = getDescriptorsForProperty(
+        prop, { configurable: true, enumerable: true });
+
+      for (const k of Object.keys(descriptorList)) {
+        Object.defineProperty(proto, k, descriptorList[k]);
+      }
+    }
+
+    proto.__notifySetUp__ = true;
+  }
+
   toProperty<T>(input: Observable<T>, propertyKey: string) {
     const obsPropertyKey: string = `___${propertyKey}_Observable`;
-    if (!(obsPropertyKey in this)) {
-      throw new Error(`Make sure to mark ${propertyKey} with the @fromObservable decorator`);
+
+    if (obsPropertyKey in this) {
+      throw new Error("Calling toProperty twice on the same property isn't supported");
     }
+
+    enablePropertyAsObservable(this, propertyKey);
 
     this[obsPropertyKey] = input;
     // tslint:disable-next-line:no-unused-expression
@@ -79,26 +100,14 @@ function getDescriptorsForProperty(name: string, descriptor: PropertyDescriptor)
   return ret;
 }
 
-export function notify(...properties: Array<string>) {
-  return (target: Function) => {
-    for (const prop of properties) {
-      const descriptorList = getDescriptorsForProperty(
-        prop, { configurable: true, enumerable: true });
-
-      for (const k of Object.keys(descriptorList)) {
-        Object.defineProperty(target.prototype, k, descriptorList[k]);
-      }
-    }
-  };
-}
-
-export function fromObservable(target: Model, propertyKey: string): void {
-  if (propertyKey in target) delete target[propertyKey];
-
+function enablePropertyAsObservable(target: Model, propertyKey: string): void {
   const obsPropertyKey: string = `___${propertyKey}_Observable`;
   const valPropertyKey: string = `___${propertyKey}_Latest`;
   const subPropertyKey: string = `___${propertyKey}_Subscription`;
 
+  if (obsPropertyKey in target) { return; }
+
+  if (propertyKey in target) delete target[propertyKey];
   target[obsPropertyKey] = null;
 
   Object.defineProperty(target, propertyKey, {

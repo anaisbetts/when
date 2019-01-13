@@ -1,11 +1,13 @@
-import { merge } from 'rxjs';
+import { merge, of } from 'rxjs';
 import { map } from 'rxjs/operators';
+
+import { Model } from '../model';
 
 import { TestClass } from './support';
 
 import { createCollection } from '../custom-operators';
 
-describe('the notify attribute', function() {
+describe('the propertyShouldNotify method', function() {
   it('should notify me!', function() {
     const fixture = new TestClass();
 
@@ -37,11 +39,26 @@ describe('the notify attribute', function() {
   });
 });
 
+export class ToPropertyTwiceIsBad extends Model {
+  derived: number;
+
+  constructor() {
+    super();
+
+    this.toProperty(of(5), 'derived');
+    this.toProperty(of(42), 'derived');
+  }
+}
+
 describe('the toProperty method', function() {
   it('should return a canned value', function() {
     const fixture = new TestClass();
 
     expect(fixture.derived).toBe(42);
+  });
+
+  it('should blow up if you try to toProperty twice', function() {
+    expect(() => new ToPropertyTwiceIsBad()).toThrowError();
   });
 
   it('should notify on changes', function() {
