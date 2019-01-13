@@ -25,7 +25,7 @@ export class TestClass extends Model {
     this.updatableFoo = new Updatable(() => of(6));
     this.someSubject = new Subject();
 
-    this.notify('foo', 'bar', 'arrayFoo');
+    this.propertyShouldNotify('foo', 'bar', 'arrayFoo');
 
     this.toProperty(of(42), 'derived');
 

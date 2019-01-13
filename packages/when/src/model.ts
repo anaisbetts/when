@@ -29,7 +29,7 @@ export class Model {
     this.innerDisp = new Subscription();
   }
 
-  notify(...properties: Array<string>) {
+  propertyShouldNotify(...properties: Array<string>) {
     const proto = Object.getPrototypeOf(this);
     if (proto.__notifySetUp__) {
       return;
