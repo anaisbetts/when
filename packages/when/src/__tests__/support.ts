@@ -1,7 +1,7 @@
 import { of, Subject } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { fromObservable, Model, notify } from '../model';
+import { Model, notify } from '../model';
 import { Updatable } from '../updatable';
 
 @notify('foo', 'bar', 'arrayFoo')
@@ -12,8 +12,9 @@ export class TestClass extends Model {
   baz: number;
   arrayFoo: number[];
   updatableFoo: Updatable<number>;
-  @fromObservable derived: number;
-  @fromObservable subjectDerived: number;
+
+  derived: number;
+  subjectDerived: number;
 
   get explodingProperty(): TestClass {
     throw new Error('Kaplowie');

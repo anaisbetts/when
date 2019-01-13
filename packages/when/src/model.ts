@@ -31,9 +31,12 @@ export class Model {
 
   toProperty<T>(input: Observable<T>, propertyKey: string) {
     const obsPropertyKey: string = `___${propertyKey}_Observable`;
-    if (!(obsPropertyKey in this)) {
-      throw new Error(`Make sure to mark ${propertyKey} with the @fromObservable decorator`);
+
+    if (obsPropertyKey in this) {
+      throw new Error("Calling toProperty twice on the same property isn't supported");
     }
+
+    enablePropertyAsObservable(this, propertyKey);
 
     this[obsPropertyKey] = input;
     // tslint:disable-next-line:no-unused-expression
@@ -92,13 +95,14 @@ export function notify(...properties: Array<string>) {
   };
 }
 
-export function fromObservable(target: Model, propertyKey: string): void {
-  if (propertyKey in target) delete target[propertyKey];
-
+function enablePropertyAsObservable(target: Model, propertyKey: string): void {
   const obsPropertyKey: string = `___${propertyKey}_Observable`;
   const valPropertyKey: string = `___${propertyKey}_Latest`;
   const subPropertyKey: string = `___${propertyKey}_Subscription`;
 
+  if (obsPropertyKey in target) { return; }
+
+  if (propertyKey in target) delete target[propertyKey];
   target[obsPropertyKey] = null;
 
   Object.defineProperty(target, propertyKey, {
