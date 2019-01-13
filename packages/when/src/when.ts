@@ -13,7 +13,7 @@ import isObject = require('lodash.isobject');
 import * as LRU from 'lru-cache';
 import { Updatable } from './updatable';
 
-const proxyCache = LRU(64);
+const proxyCache = new LRU(64);
 
 const identifier = /^[$A-Z_][0-9A-Z_$]*$/i;
 
