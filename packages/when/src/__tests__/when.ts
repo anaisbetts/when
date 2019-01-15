@@ -3,74 +3,70 @@ import { distinctUntilChanged, map, materialize, switchAll } from 'rxjs/operator
 
 import { createCollection } from '../custom-operators';
 import { Updatable } from '../updatable';
-import { getValue, when, whenProperty } from '../when';
-import { notificationForProperty, observableForPropertyChain } from '../when';
+import { getValue, observableForPropertyChain, when, whenProperty } from '../when';
 
 import { TestClass } from '../test-support';
+import { notificationForProperty } from '../when-helpers';
 
 describe('the getValue method', function() {
   it ('should fetch simple values', function() {
     const fixture = new TestClass();
 
     fixture.bar = 4;
-    expect(getValue(fixture, f => f.bar).result).toEqual(4);
+    expect(getValue(fixture, f => f.bar)!.value).toEqual(4);
 
     fixture.bar = 10;
-    expect(getValue(fixture, f => f.bar).result).toEqual(10);
+    expect(getValue(fixture, f => f.bar)!.value).toEqual(10);
   });
 
   it ('should fetch through Updatable values', function() {
     const fixture = new TestClass();
-    expect(getValue(fixture, f => f.updatableFoo).result).toEqual(6);
+    expect(getValue(fixture, f => f.updatableFoo)!.value).toEqual(6);
 
     fixture.updatableFoo.next(10);
-    expect(getValue(fixture, f => f.updatableFoo).result).toEqual(10);
+    expect(getValue(fixture, f => f.updatableFoo)!.value).toEqual(10);
   });
 
   it ('should fetch through Updatable values even when explicitly requested', function() {
     const fixture = new TestClass();
-    expect(getValue(fixture, f => f.updatableFoo.value).result).toEqual(6);
+    expect(getValue(fixture, f => f.updatableFoo.value)!.value).toEqual(6);
 
     fixture.updatableFoo.next(10);
-    expect(getValue(fixture, f => f.updatableFoo.value).result).toEqual(10);
+    expect(getValue(fixture, f => f.updatableFoo.value)!.value).toEqual(10);
   });
 
   it ('should fetch through Updatable when its the first one', function() {
     const fixture = new Updatable(() => of(new TestClass));
 
-    expect(getValue(fixture, (f: any) => f.updatableFoo).result).toEqual(6);
+    expect(getValue(fixture, (f: any) => f.updatableFoo)!.value).toEqual(6);
   });
 
   it ('should fetch through Updatable when its the first one even when explicitly requested', function() {
     const fixture = new Updatable(() => of(new TestClass));
 
-    expect(getValue(fixture, f => f.value.updatableFoo).result).toEqual(6);
+    expect(getValue(fixture, f => f.value.updatableFoo)!.value).toEqual(6);
   });
 
   it ('should fail if it cant walk the entire property chain', function() {
     const fixture = new TestClass();
-    const { result, failed } = getValue(fixture, (f: any) => f.blart.boop.bop);
+    const result = getValue(fixture, (f: any) => f.blart.boop.bop);
 
-    expect(failed).toBeTruthy();
-    expect(result).toEqual(undefined);
+    expect(result).toBeNull();
   });
 
   it ('should fail if walking the chain throws', function() {
     const fixture = new TestClass();
-    const { result, failed } = getValue(fixture, f => f.explodingProperty.bar);
+    const result = getValue(fixture, f => f.explodingProperty.bar);
 
-    expect(failed).toBeTruthy();
-    expect(result).toEqual(undefined);
+    expect(result).toBeNull();
   });
 
   it ('should fail if walking the chain throws in an Updatable', function() {
     const fixture = new TestClass();
     fixture.updatableFoo.nextAsync(throwError(new Error('die')));
 
-    const { result, failed } = getValue(fixture, f => f.updatableFoo);
-
-    expect(failed).toBeTruthy();
-    expect(result).toEqual(undefined);
+    const result = getValue(fixture, f => f.updatableFoo);
+    expect(result).toBeNull();
   });
 });
 

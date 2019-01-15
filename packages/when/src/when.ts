@@ -1,20 +1,16 @@
-import { combineLatest, never, Observable } from 'rxjs';
-import { distinctUntilChanged, filter, map, skip, startWith, switchAll, switchMap, take } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { distinctUntilChanged, map, startWith, switchAll } from 'rxjs/operators';
 
-import { ChangeNotification, Model, TypedChangeNotification } from './model';
+import { ChangeNotification, TypedChangeNotification } from './model';
 
-// tslint:disable-next-line:no-require-imports
-import isEqual = require('lodash.isequal');
-// tslint:disable-next-line:no-require-imports
-import isFunction = require('lodash.isfunction');
 // tslint:disable-next-line:no-require-imports
 import isObject = require('lodash.isobject');
 
-import * as LRU from 'lru-cache';
-import { Updatable } from './updatable';
+// tslint:disable-next-line:no-require-imports
+import isEqual = require('lodash.isequal');
 
-const proxyCache = new LRU(64);
-const identifier = /^[$A-Z_][0-9A-Z_$]*$/i;
+import { Updatable } from './updatable';
+import { chainToProps, fetchValueForPropertyChain, notificationForProperty } from './when-helpers';
 
 export function whenPropertyInternal(
     target: any,
@@ -43,6 +39,13 @@ export function whenPropertyInternal(
   return combineLatest(...propWatchers, selector).pipe(
     distinctUntilChanged((x, y) => isEqual(x, y)),
   );
+}
+
+export function getValue<T, TRet>(
+    target: T,
+    accessor: PropSelector<T, TRet> | string | string[]): ChangeNotification | null {
+  const propChain = chainToProps(accessor);
+  return fetchValueForPropertyChain(target, propChain);
 }
 
 export function observableForPropertyChain(
@@ -90,125 +93,6 @@ export function observableForPropertyChain(
     distinctUntilChanged((x, y) => isEqual(x.value, y.value)));
 }
 
-export function notificationForProperty(target: any, prop: string, before = false): Observable<ChangeNotification> {
-  if (!target || !isObject(target)) {
-    return never();
-  }
-
-  if (!target || !(prop in target)) {
-    return never();
-  }
-
-  if (target instanceof Model) {
-    if (target[prop] instanceof Updatable) {
-      return (before ? target.changing : target.changed).pipe(
-        startWith({sender: target, property: prop, value: target[prop]}),
-        filter(({property}) => prop === property),
-        switchMap((cn: any) => {
-          const obs: Observable<any> = cn.value;
-          return obs.pipe(
-            skip(1),
-            map((value) => ({ sender: cn.sender, property: cn.property, value })),
-          );
-        }),
-      );
-    } else {
-      return (before ? target.changing : target.changed).pipe(
-        filter(({property}) => prop === property),
-      );
-    }
-  }
-
-  return never();
-}
-
-export function getValue<T, TRet>(target: T, accessor: ((x: T) => TRet)): { result?: TRet, failed: boolean } {
-  const propChain = chainToProps(accessor);
-  return fetchValueForPropertyChain(target, propChain);
-}
-
-// tslint:disable-next-line:no-empty
-const EMPTY_FN = () => {};
-export class SelfDescribingProxyHandler implements ProxyHandler<Function> {
-  static create(name = ''): any {
-    let ret = proxyCache.get(name);
-    if (ret) return ret;
-
-    ret = new Proxy(EMPTY_FN, new SelfDescribingProxyHandler(name));
-    proxyCache.set(name, ret!);
-    return ret;
-  }
-
-  constructor(public name: string) {}
-
-  get(_target: any, name: string): any {
-    return SelfDescribingProxyHandler.create(`${this.name}.${name}`);
-  }
-
-  apply() {
-    return this.name;
-  }
-}
-
-const didntWork = { failed: true };
-function fetchValueForPropertyChain(target: any, chain: Array<string>): { result?: any, failed: boolean } {
-  let current = target;
-  if (current instanceof Updatable && chain[0] !== 'value') {
-    try {
-      current = current.value;
-    } catch (_e) {
-      return didntWork;
-    }
-  }
-
-  for (let i = 0; i < chain.length; i++) {
-    try {
-      current = current[chain[i]];
-    } catch (_e) {
-      return didntWork;
-    }
-
-    if (current === undefined) return didntWork;
-
-    // NB: Current is a non-object; if we're at the end of the chain, we
-    // should return it, if we're not, we're in an error state and should
-    // bail
-    if (!isObject(current))  {
-      return (i === chain.length - 1) ? { result: current, failed: false} : didntWork;
-    }
-
-    if (current instanceof Updatable && chain[i + 1] !== 'value') {
-      try {
-        current = current.value;
-      } catch (_e) {
-        return didntWork;
-      }
-    }
-  }
-
-  return { result: current, failed: false };
-}
-
-function chainToProps(chain: string | Function | string[]) {
-  let props: Array<string>;
-
-  if (Array.isArray(chain)) {
-    props = chain;
-  } else if (isFunction(chain)) {
-    const input = SelfDescribingProxyHandler.create();
-    const result: Function = chain(input);
-
-    const ret: string = result();
-    props = ret.substring(1).split('.');
-  } else {
-    props = (chain as string).split('.');
-    if (props.find((x) => x.match(identifier) === null)) {
-      throw new Error("property name must be of the form 'foo.bar.baz'");
-    }
-  }
-
-  return props;
-}
 
 /*
  * Extremely boring and ugly type descriptions ahead
