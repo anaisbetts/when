@@ -10,6 +10,9 @@ describe('The Updatable class', function() {
     fixture.subscribe(x => result = x);
     expect(result).toEqual(42);
 
+    fixture.next(10);
+    expect(result).toEqual(10);
+
     fixture = new Updatable(() => of(42));
     result = -1;
     fixture.subscribe(x => result = x);

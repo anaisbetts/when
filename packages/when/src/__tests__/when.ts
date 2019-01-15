@@ -6,7 +6,7 @@ import { Updatable } from '../updatable';
 import { getValue, when, whenProperty } from '../when';
 import { notificationForProperty, observableForPropertyChain } from '../when';
 
-import { TestClass } from './support';
+import { TestClass } from '../test-support';
 
 describe('the getValue method', function() {
   it ('should fetch simple values', function() {
@@ -362,7 +362,7 @@ describe('the untyped when method', function() {
 
   it('should reach through Updatables', function() {
     const fixture = new TestClass();
-    const result = createCollection(when(fixture, 'updatableFoo.value'));
+    const result = createCollection(when(fixture, 'updatableFoo'));
 
     expect(result.length).toEqual(1);
     expect(result[0]).toEqual(6);
@@ -414,7 +414,7 @@ describe('the typed when method', function() {
 
   it('should reach through Updatables', function() {
     const fixture = new TestClass();
-    const result = createCollection(when(fixture, x => x.updatableFoo.value));
+    const result = createCollection(when(fixture, x => x.updatableFoo));
 
     expect(result.length).toEqual(1);
     expect(result[0]).toEqual(6);
@@ -427,10 +427,14 @@ describe('the typed when method', function() {
   it('should reach deeply through Updatables', function() {
     const fixture = new TestClass();
     const result = createCollection(when(fixture, x => x.updatableTodo.value!.title));
+    const updatableResult = createCollection(fixture.updatableTodo);
 
     expect(result.length).toEqual(0);
+    expect(updatableResult.length).toEqual(1);
+
     fixture.updatableTodo.next({ title: 'foo', description: 'bar', completed: false });
 
+    expect(updatableResult.length).toEqual(2);
     expect(result.length).toEqual(1);
     expect(result[0]).toEqual('foo');
   });

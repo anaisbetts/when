@@ -1,8 +1,8 @@
 import { of, Subject } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { Model } from '../model';
-import { Updatable } from '../updatable';
+import { Model } from './model';
+import { Updatable } from './updatable';
 
 interface TodoItem {
   title: string;

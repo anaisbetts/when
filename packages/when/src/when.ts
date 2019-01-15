@@ -14,7 +14,6 @@ import * as LRU from 'lru-cache';
 import { Updatable } from './updatable';
 
 const proxyCache = new LRU(64);
-
 const identifier = /^[$A-Z_][0-9A-Z_$]*$/i;
 
 export function whenPropertyInternal(
@@ -50,27 +49,17 @@ export function observableForPropertyChain(
     target: any,
     chain: (Array<string> | string | Function),
     before = false): Observable<ChangeNotification> {
-  let props: Array<string>;
-
-  if (Array.isArray(chain)) {
-    props = chain;
-  } else if (isFunction(chain)) {
-    props = functionToPropertyChain(chain as Function);
-  } else {
-    props = (chain as string).split('.');
-
-    if (props.find((x) => x.match(identifier) === null)) {
-      throw new Error("property name must be of the form 'foo.bar.baz'");
-    }
-  }
+  const props: Array<string> = chainToProps(chain);
 
   const firstProp = props[0];
   let start = notificationForProperty(target, firstProp, before);
+  let isUpdatable = false;
 
   if (isObject(target) && firstProp in target) {
     let val = target[firstProp];
 
     if (isObject(val) && (val instanceof Updatable)) {
+      isUpdatable = true;
       val = val.value;
     }
 
@@ -81,6 +70,10 @@ export function observableForPropertyChain(
   if (props.length === 1) {
     return start.pipe(
       distinctUntilChanged((x, y) => isEqual(x.value, y.value)));
+  }
+
+  if (isUpdatable && props[1] === 'value') {
+    props.splice(1, 1);
   }
 
   // target.foo
@@ -98,31 +91,35 @@ export function observableForPropertyChain(
 }
 
 export function notificationForProperty(target: any, prop: string, before = false): Observable<ChangeNotification> {
-  if (!(target instanceof Model)) {
+  if (!target || !isObject(target)) {
     return never();
   }
 
-  if (!(prop in target)) {
+  if (!target || !(prop in target)) {
     return never();
   }
 
-  if (target[prop] instanceof Updatable) {
-    return (before ? target.changing : target.changed).pipe(
-      startWith({sender: target, property: prop, value: target[prop]}),
-      filter(({property}) => prop === property),
-      switchMap(cn => {
-        const obs: Observable<any> = cn.value;
-        return obs.pipe(
-          skip(1),
-          map((value) => ({ sender: cn.sender, property: cn.property, value })),
-        );
-      }),
-    );
+  if (target instanceof Model) {
+    if (target[prop] instanceof Updatable) {
+      return (before ? target.changing : target.changed).pipe(
+        startWith({sender: target, property: prop, value: target[prop]}),
+        filter(({property}) => prop === property),
+        switchMap((cn: any) => {
+          const obs: Observable<any> = cn.value;
+          return obs.pipe(
+            skip(1),
+            map((value) => ({ sender: cn.sender, property: cn.property, value })),
+          );
+        }),
+      );
+    } else {
+      return (before ? target.changing : target.changed).pipe(
+        filter(({property}) => prop === property),
+      );
+    }
   }
 
-  return (before ? target.changing : target.changed).pipe(
-    filter(({property}) => prop === property),
-  );
+  return never();
 }
 
 // tslint:disable-next-line:no-empty
@@ -211,6 +208,23 @@ export function getResultAfterChange<T extends Model, TProp>(
     filter(predicate),
     take(numberOfChanges),
   ).toPromise();
+}
+
+function chainToProps(chain: string | Function | string[]) {
+  let props: Array<string>;
+
+  if (Array.isArray(chain)) {
+    props = chain;
+  } else if (isFunction(chain)) {
+    props = functionToPropertyChain(chain as Function);
+  } else {
+    props = (chain as string).split('.');
+    if (props.find((x) => x.match(identifier) === null)) {
+      throw new Error("property name must be of the form 'foo.bar.baz'");
+    }
+  }
+
+  return props;
 }
 
 /*

@@ -3,7 +3,7 @@ import { map } from 'rxjs/operators';
 
 import { Model } from '../model';
 
-import { TestClass } from './support';
+import { TestClass } from '../test-support';
 
 import { createCollection } from '../custom-operators';
 

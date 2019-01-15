@@ -1,7 +1,7 @@
 module.exports = () => {
   return {
     files: [
-      'src/*.ts',
+      'src/**/*.ts', 
       '!src/**/__tests__/*.ts'
     ],
     tests: [
@@ -11,6 +11,6 @@ module.exports = () => {
       type: 'node',
       runner: 'node',
     },
-    testFramework: 'jest',
+    testFramework: 'jest'
   };
 };
