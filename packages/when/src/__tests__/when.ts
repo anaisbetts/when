@@ -362,7 +362,7 @@ describe('the untyped when method', function() {
 
   it('should reach through Updatables', function() {
     const fixture = new TestClass();
-    const result = createCollection(when(fixture, 'updatableFoo'));
+    const result = createCollection(when(fixture, 'updatableFoo.value'));
 
     expect(result.length).toEqual(1);
     expect(result[0]).toEqual(6);
@@ -414,7 +414,7 @@ describe('the typed when method', function() {
 
   it('should reach through Updatables', function() {
     const fixture = new TestClass();
-    const result = createCollection(when(fixture, x => x.updatableFoo));
+    const result = createCollection(when(fixture, x => x.updatableFoo.value));
 
     expect(result.length).toEqual(1);
     expect(result[0]).toEqual(6);
@@ -422,5 +422,16 @@ describe('the typed when method', function() {
     fixture.updatableFoo.next(12);
     expect(result.length).toEqual(2);
     expect(result[1]).toEqual(12);
+  });
+
+  it('should reach deeply through Updatables', function() {
+    const fixture = new TestClass();
+    const result = createCollection(when(fixture, x => x.updatableTodo.value!.title));
+
+    expect(result.length).toEqual(0);
+    fixture.updatableTodo.next({ title: 'foo', description: 'bar', completed: false });
+
+    expect(result.length).toEqual(1);
+    expect(result[0]).toEqual('foo');
   });
 });

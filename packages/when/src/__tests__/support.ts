@@ -4,6 +4,12 @@ import { map, startWith } from 'rxjs/operators';
 import { Model } from '../model';
 import { Updatable } from '../updatable';
 
+interface TodoItem {
+  title: string;
+  description: string;
+  completed: boolean;
+}
+
 export class TestClass extends Model {
   someSubject: Subject<number>;
   foo: number;
@@ -11,6 +17,7 @@ export class TestClass extends Model {
   baz: number;
   arrayFoo: number[];
   updatableFoo: Updatable<number>;
+  updatableTodo: Updatable<TodoItem | null>;
 
   derived: number;
   subjectDerived: number;
@@ -23,6 +30,7 @@ export class TestClass extends Model {
     super();
     this.arrayFoo = [1];
     this.updatableFoo = new Updatable(() => of(6));
+    this.updatableTodo = new Updatable(() => of(null));
     this.someSubject = new Subject();
 
     this.propertyShouldNotify('foo', 'bar', 'arrayFoo');
