@@ -1,7 +1,7 @@
 import { combineLatest, Observable } from 'rxjs';
 import { distinctUntilChanged, map, startWith, switchAll } from 'rxjs/operators';
 
-import { ChangeNotification, TypedChangeNotification } from './model';
+import { ChangeNotification, UntypedChangeNotification } from './model';
 
 // tslint:disable-next-line:no-require-imports
 import isObject = require('lodash.isobject');
@@ -43,16 +43,20 @@ export function whenPropertyInternal(
 
 export function getValue<T, TRet>(
     target: T,
-    accessor: PropSelector<T, TRet> | string | string[]): ChangeNotification | null {
+    accessor: PropSelector<T, TRet>): ChangeNotification<T, TRet> | null;
+
+export function getValue(
+    target: any,
+    accessor: UntypedPropSelector): UntypedChangeNotification | null {
   const propChain = chainToProps(accessor);
   return fetchValueForPropertyChain(target, propChain);
 }
 
 export function observableForPropertyChain(
     target: any,
-    chain: (Array<string> | string | Function),
-    before = false): Observable<ChangeNotification> {
-  const props: Array<string> = chainToProps(chain);
+    chain: UntypedPropSelector,
+    before = false): Observable<UntypedChangeNotification> {
+  const props = chainToProps(chain);
 
   const firstProp = props[0];
   let start = notificationForProperty(target, firstProp, before);
@@ -98,7 +102,8 @@ export function observableForPropertyChain(
  * Extremely boring and ugly type descriptions ahead
  */
 
-export type PropSelector<TIn, TOut> = ((t: TIn) => TOut) | string;
+export type UntypedPropSelector = Function | string | string[];
+export type PropSelector<TIn, TOut> = ((t: TIn) => TOut) | string | string[];
 
 export function when<TSource, TRet>(
     target: TSource,
@@ -139,21 +144,21 @@ export function when<TSource, TProp1, TProp2, TRet>(
     sel: ((p1: TProp1, p2: TProp2) => TRet)):
   Observable<TRet>;
 
-export function when(target: any, ...propsAndSelector: Array<string|Function|string[]>): Observable<any> {
+export function when(target: any, ...propsAndSelector: Array<UntypedPropSelector>): Observable<any> {
   return whenPropertyInternal(target, true, ...propsAndSelector);
 }
 
 export function whenProperty<TSource, TRet>(
     target: TSource,
     prop: PropSelector<TSource, TRet>):
-  Observable<TypedChangeNotification<TSource, TRet>>;
+  Observable<ChangeNotification<TSource, TRet>>;
 
 export function whenProperty<TSource, TProp1, TProp2, TRet>(
     target: TSource,
     prop1: PropSelector<TSource, TProp1>,
     prop2: PropSelector<TSource, TProp2>,
-    sel: ((p1: TypedChangeNotification<TSource, TProp1>, p2: TypedChangeNotification<TSource, TProp2>) => TRet)):
-  Observable<TypedChangeNotification<TSource, TRet>>;
+    sel: ((p1: ChangeNotification<TSource, TProp1>, p2: ChangeNotification<TSource, TProp2>) => TRet)):
+  Observable<ChangeNotification<TSource, TRet>>;
 
 export function whenProperty<TSource, TProp1, TProp2, TProp3, TRet>(
     target: TSource,
@@ -161,10 +166,10 @@ export function whenProperty<TSource, TProp1, TProp2, TProp3, TRet>(
     prop2: PropSelector<TSource, TProp2>,
     prop3: PropSelector<TSource, TProp3>,
     sel: ((
-      p1: TypedChangeNotification<TSource, TProp1>,
-      p2: TypedChangeNotification<TSource, TProp2>,
-      p3: TypedChangeNotification<TSource, TProp3>) => TRet)):
-  Observable<TypedChangeNotification<TSource, TRet>>;
+      p1: ChangeNotification<TSource, TProp1>,
+      p2: ChangeNotification<TSource, TProp2>,
+      p3: ChangeNotification<TSource, TProp3>) => TRet)):
+  Observable<ChangeNotification<TSource, TRet>>;
 
 export function whenProperty<TSource, TProp1, TProp2, TProp3, TProp4, TRet>(
     target: TSource,
@@ -173,12 +178,12 @@ export function whenProperty<TSource, TProp1, TProp2, TProp3, TProp4, TRet>(
     prop3: PropSelector<TSource, TProp3>,
     prop4: PropSelector<TSource, TProp4>,
     sel: ((
-      p1: TypedChangeNotification<TSource, TProp1>,
-      p2: TypedChangeNotification<TSource, TProp2>,
-      p3: TypedChangeNotification<TSource, TProp3>,
-      p4: TypedChangeNotification<TSource, TProp4>) => TRet)):
-  Observable<TypedChangeNotification<TSource, TRet>>;
+      p1: ChangeNotification<TSource, TProp1>,
+      p2: ChangeNotification<TSource, TProp2>,
+      p3: ChangeNotification<TSource, TProp3>,
+      p4: ChangeNotification<TSource, TProp4>) => TRet)):
+  Observable<ChangeNotification<TSource, TRet>>;
 
-export function whenProperty(target: any, ...propsAndSelector: Array<string|Function|string[]>): Observable<any> {
+export function whenProperty(target: any, ...propsAndSelector: Array<UntypedPropSelector>): Observable<any> {
   return whenPropertyInternal(target, false, ...propsAndSelector);
 }

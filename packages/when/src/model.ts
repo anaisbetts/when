@@ -6,21 +6,21 @@ import isEqual = require('lodash.isequal');
 
 const d = debug('when:model');
 
-export interface ChangeNotification {
+export interface UntypedChangeNotification {
   sender: any;
   property: string;
   value?: any;
 }
 
-export interface TypedChangeNotification<TSender, TVal> extends ChangeNotification {
+export interface ChangeNotification<TSender, TVal> extends UntypedChangeNotification {
   sender: TSender;
   property: string;
   value?: TVal;
 }
 
 export class Model {
-  changing: Subject<ChangeNotification>;
-  changed: Subject<ChangeNotification>;
+  changing: Subject<UntypedChangeNotification>;
+  changed: Subject<UntypedChangeNotification>;
   innerDisp: Subscription;
 
   constructor() {
@@ -29,14 +29,15 @@ export class Model {
     this.innerDisp = new Subscription();
   }
 
-  propertyShouldNotify(...properties: Array<string>) {
+  notifyFor(...properties: Array<string>) {
     const proto = Object.getPrototypeOf(this);
+
     if (proto.__notifySetUp__) {
       return;
     }
 
     for (const prop of properties) {
-      const descriptorList = getDescriptorsForProperty(
+      const descriptorList = getNotifyDescriptorsForProperty(
         prop, { configurable: true, enumerable: true });
 
       for (const k of Object.keys(descriptorList)) {
@@ -44,7 +45,7 @@ export class Model {
       }
     }
 
-    proto.__notifySetUp__ = true;
+    proto.__notifySetUpUpdatable__ = true;
   }
 
   toProperty<T>(input: Observable<T>, propertyKey: string) {
@@ -70,7 +71,7 @@ export class Model {
   }
 }
 
-function getDescriptorsForProperty(name: string, descriptor: PropertyDescriptor) {
+function getNotifyDescriptorsForProperty(name: string, descriptor: PropertyDescriptor) {
   const backingStoreName = `__${name}__`;
 
   const newDescriptor: PropertyDescriptor = {

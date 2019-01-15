@@ -130,7 +130,7 @@ describe('the notificationForPropertyChain method', function() {
     expect(updates.length).toBe(3);
   });
 
-  it('should notify deeply through Updatables without value', function() {
+  it.skip('should notify deeply through Updatables without value', function() {
     const fixture = new TestClass();
     const result = createCollection(notificationForPropertyChain(fixture, ['updatableTodo', 'title']));
     const updatableResult = createCollection(fixture.updatableTodo);
@@ -145,7 +145,7 @@ describe('the notificationForPropertyChain method', function() {
     expect(result[0]).toEqual('foo');
   });
 
-  it('should notify deeply through Updatables with value', function() {
+  it.skip('should notify deeply through Updatables with value', function() {
     const fixture = new TestClass();
     const result = createCollection(notificationForPropertyChain(fixture, ['updatableTodo', 'value', 'title']));
     const updatableResult = createCollection(fixture.updatableTodo);
@@ -159,5 +159,4 @@ describe('the notificationForPropertyChain method', function() {
     expect(result.length).toEqual(1);
     expect(result[0]).toEqual('foo');
   });
-
 });

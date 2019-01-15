@@ -1,7 +1,7 @@
 import { never, Observable } from 'rxjs';
 import { filter, map, skip, startWith, switchMap } from 'rxjs/operators';
 
-import { ChangeNotification, Model } from './model';
+import { Model, UntypedChangeNotification } from './model';
 
 // tslint:disable-next-line:no-require-imports
 import isFunction = require('lodash.isfunction');
@@ -14,7 +14,10 @@ import { Updatable } from './updatable';
 const proxyCache = new LRU(64);
 const identifier = /^[$A-Z_][0-9A-Z_$]*$/i;
 
-export function notificationForProperty(target: any, prop: string, before = false): Observable<ChangeNotification> {
+export function notificationForProperty(
+    target: any,
+    prop: string,
+    before = false): Observable<UntypedChangeNotification> {
   if (!target || !isObject(target)) {
     return never();
   }
@@ -49,7 +52,6 @@ export function notificationForProperty(target: any, prop: string, before = fals
 }
 
 export function notificationForPropertyChain(target: any, props: string[], before = false): Observable<any> {
-  console.log(`NFPC: ${props}`);
   if (props.length === 1) {
     return notificationForProperty(target, props[0], before);
   }
@@ -61,7 +63,7 @@ export function notificationForPropertyChain(target: any, props: string[], befor
 
   return notificationForProperty(target, props[0], before).pipe(
     startWith(target),
-    switchMap((x: ChangeNotification) => {
+    switchMap((x: UntypedChangeNotification) => {
       if (!x || !x.value) { return never(); }
       const newTarget = x.value;
 
@@ -92,7 +94,7 @@ export class SelfDescribingProxyHandler implements ProxyHandler<Function> {
   }
 }
 
-export function fetchValueForPropertyChain(target: any, chain: Array<string>): ChangeNotification | null {
+export function fetchValueForPropertyChain(target: any, chain: Array<string>): UntypedChangeNotification | null {
   let current = target;
   if (current instanceof Updatable && chain[0] !== 'value') {
     try {
@@ -132,7 +134,7 @@ export function fetchValueForPropertyChain(target: any, chain: Array<string>): C
   return { sender: target, property: chain.join('.'), value: current };
 }
 
-export function chainToProps(chain: string | Function | string[]) {
+export function chainToProps(chain: string | Function | string[], maxLength?: number) {
   let props: Array<string>;
 
   if (Array.isArray(chain)) {
@@ -148,6 +150,10 @@ export function chainToProps(chain: string | Function | string[]) {
     if (props.find((x) => x.match(identifier) === null)) {
       throw new Error("property name must be of the form 'foo.bar.baz'");
     }
+  }
+
+  if (maxLength && props.length > maxLength) {
+    throw new Error(`Accessor ${props.join('.')} is too long, it has a max length of ${maxLength}`);
   }
 
   return props;
