@@ -19,33 +19,55 @@ export function notificationForProperty(target: any, prop: string, before = fals
     return never();
   }
 
+  if (target instanceof Updatable) {
+    if (prop === 'value') {
+      return target.pipe(
+        map((x: any) => ({ sender: target, property: prop, value: x })),
+      );
+    } else {
+      return target.pipe(
+        startWith(null),
+        switchMap(() => notificationForProperty(target.value, prop, before).pipe(
+          startWith({sender: target, property: prop, value: target.value[prop]}),
+        )),
+        skip(2),
+      );
+    }
+  }
+
   if (!target || !(prop in target)) {
     return never();
   }
 
   if (target instanceof Model) {
-    if (target[prop] instanceof Updatable) {
-      return (before ? target.changing : target.changed).pipe(
-        startWith({sender: target, property: prop, value: target[prop]}),
-        filter(({property}) => prop === property),
-        switchMap((cn: any) => {
-          const obs: Observable<any> = cn.value;
-          return obs.pipe(
-            skip(1),
-            map((value) => ({ sender: cn.sender, property: cn.property, value })),
-          );
-        }),
-      );
-    } else {
-      return (before ? target.changing : target.changed).pipe(
-        filter(({property}) => prop === property),
-      );
-    }
+    return (before ? target.changing : target.changed).pipe(
+      filter(({property}) => prop === property),
+    );
   }
 
   return never();
 }
 
+export function notificationForPropertyChain(target: any, props: string[], before = false): Observable<any> {
+  console.log(`NFPC: ${props}`);
+  if (props.length === 1) {
+    return notificationForProperty(target, props[0], before);
+  }
+
+  let toSkip = 1;
+  if (isObject(target) && target instanceof Updatable && props[0] === 'value') {
+    toSkip++;
+  }
+
+  return notificationForProperty(target, props[0], before).pipe(
+    startWith(target),
+    switchMap((x: ChangeNotification) => {
+      if (!x || !x.value) { return never(); }
+      const newTarget = x.value;
+
+      return notificationForPropertyChain(newTarget, props.slice(toSkip), before);
+    }));
+}
 
 // tslint:disable-next-line:no-empty
 const EMPTY_FN = () => {};
@@ -107,7 +129,7 @@ export function fetchValueForPropertyChain(target: any, chain: Array<string>): C
     }
   }
 
-  return {  sender: target, property: chain.join('.'), value: current};
+  return { sender: target, property: chain.join('.'), value: current };
 }
 
 export function chainToProps(chain: string | Function | string[]) {

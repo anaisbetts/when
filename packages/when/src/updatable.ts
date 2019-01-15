@@ -136,8 +136,6 @@ export class Updatable<T> extends Subject<T> {
     super.next(this._value);
   }
 
-
-
   error(error: any) {
     d(`Updatable threw error: ${error.message}\nCurrent value is ${JSON.stringify(this._value)}\n${error.stack}`);
     this._hasValue = true;

@@ -114,8 +114,6 @@ describe('The Updatable class', function() {
     expect(fixture.value).toEqual({a: 1, b: {c: 2, d: 4}});
   });
 
-
-
   it('drops the current value on invalidate', function() {
     const fixture = new Updatable<Object>(() => of({a: 1}), 'merge');
     expect(fixture.value).toEqual({a: 1});
