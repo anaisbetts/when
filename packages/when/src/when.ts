@@ -122,6 +122,11 @@ export function notificationForProperty(target: any, prop: string, before = fals
   return never();
 }
 
+export function getValue<T, TRet>(target: T, accessor: ((x: T) => TRet)): { result?: TRet, failed: boolean } {
+  const propChain = chainToProps(accessor);
+  return fetchValueForPropertyChain(target, propChain);
+}
+
 // tslint:disable-next-line:no-empty
 const EMPTY_FN = () => {};
 export class SelfDescribingProxyHandler implements ProxyHandler<Function> {
@@ -145,16 +150,8 @@ export class SelfDescribingProxyHandler implements ProxyHandler<Function> {
   }
 }
 
-export function functionToPropertyChain(chain: Function): Array<string> {
-  const input = SelfDescribingProxyHandler.create();
-  const result: Function = chain(input);
-
-  const ret: string = result();
-  return ret.substring(1).split('.');
-}
-
 const didntWork = { failed: true };
-export function fetchValueForPropertyChain(target: any, chain: Array<string>): { result?: any, failed: boolean } {
+function fetchValueForPropertyChain(target: any, chain: Array<string>): { result?: any, failed: boolean } {
   let current = target;
   if (current instanceof Updatable && chain[0] !== 'value') {
     try {
@@ -192,31 +189,17 @@ export function fetchValueForPropertyChain(target: any, chain: Array<string>): {
   return { result: current, failed: false };
 }
 
-export function getValue<T, TRet>(target: T, accessor: ((x: T) => TRet)): { result?: TRet, failed: boolean } {
-  const propChain = functionToPropertyChain(accessor);
-  return fetchValueForPropertyChain(target, propChain);
-}
-
-const defaultResultPredicate = (v: any) => Array.isArray(v) ? !!v.length : !!v;
-export function getResultAfterChange<T extends Model, TProp>(
-    target: T,
-    selector: (value: T) => TProp,
-    predicate: (value: TProp, index: number) => boolean = defaultResultPredicate,
-    numberOfChanges: number = 1): Promise<TProp> {
-
-  return whenPropertyInternal(target, true, selector).pipe(
-    filter(predicate),
-    take(numberOfChanges),
-  ).toPromise();
-}
-
 function chainToProps(chain: string | Function | string[]) {
   let props: Array<string>;
 
   if (Array.isArray(chain)) {
     props = chain;
   } else if (isFunction(chain)) {
-    props = functionToPropertyChain(chain as Function);
+    const input = SelfDescribingProxyHandler.create();
+    const result: Function = chain(input);
+
+    const ret: string = result();
+    props = ret.substring(1).split('.');
   } else {
     props = (chain as string).split('.');
     if (props.find((x) => x.match(identifier) === null)) {
