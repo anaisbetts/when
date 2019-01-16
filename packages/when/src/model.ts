@@ -4,6 +4,10 @@ import * as debug from 'debug';
 // tslint:disable-next-line:no-require-imports
 import isEqual = require('lodash.isequal');
 
+import { MergeStrategy, Updatable } from './updatable';
+import { UntypedPropSelector } from './when';
+import { chainToProps } from './when-helpers';
+
 const d = debug('when:model');
 
 export interface UntypedChangeNotification {
@@ -29,14 +33,12 @@ export class Model {
     this.innerDisp = new Subscription();
   }
 
-  notifyFor(...properties: Array<string>) {
+  notifyFor(...properties: Array<UntypedPropSelector>) {
     const proto = Object.getPrototypeOf(this);
+    const names = properties.map(x => chainToProps(x, 1)[0]);
 
-    if (proto.__notifySetUp__) {
-      return;
-    }
-
-    for (const prop of properties) {
+    for (const prop of names) {
+      if (prop in proto) return;
       const descriptorList = getNotifyDescriptorsForProperty(
         prop, { configurable: true, enumerable: true });
 
@@ -44,22 +46,44 @@ export class Model {
         Object.defineProperty(proto, k, descriptorList[k]);
       }
     }
-
-    proto.__notifySetUpUpdatable__ = true;
   }
 
-  toProperty<T>(input: Observable<T>, propertyKey: string) {
-    const obsPropertyKey: string = `___${propertyKey}_Observable`;
+  lazyFor<T>(
+      property: UntypedPropSelector,
+      factory?: () => (Promise<T>|Observable<T>),
+      strategy?: MergeStrategy) {
+    const proto = Object.getPrototypeOf(this);
+    const [name] = chainToProps(property, 1);
+    const backingStoreName = `__${name}_Updatable__`;
+
+    if (backingStoreName in proto) return;
+    this.toProperty(new Updatable(factory, strategy), property);
+  }
+
+  toProperty<T>(input: Observable<T>, property: UntypedPropSelector) {
+    const [name] = chainToProps(property, 1);
+    const obsPropertyKey: string = `___${name}_Observable`;
 
     if (obsPropertyKey in this) {
       throw new Error("Calling toProperty twice on the same property isn't supported");
     }
 
-    enablePropertyAsObservable(this, propertyKey);
+    enablePropertyAsObservable(this, name);
 
     this[obsPropertyKey] = input;
     // tslint:disable-next-line:no-unused-expression
-    this[propertyKey];
+    this[name];
+  }
+
+  invalidate(property: UntypedPropSelector) {
+    const [name] = chainToProps(property, 1);
+    const obsPropertyKey: string = `___${name}_Observable`;
+
+    if (this[obsPropertyKey] instanceof Updatable) {
+      this[obsPropertyKey].invalidate();
+    } else {
+      this[name] = null;
+    }
   }
 
   unsubscribe() {

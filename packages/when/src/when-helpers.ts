@@ -10,6 +10,7 @@ import isObject = require('lodash.isobject');
 
 import * as LRU from 'lru-cache';
 import { Updatable } from './updatable';
+import { UntypedPropSelector } from './when';
 
 const proxyCache = new LRU(64);
 const identifier = /^[$A-Z_][0-9A-Z_$]*$/i;
@@ -134,7 +135,7 @@ export function fetchValueForPropertyChain(target: any, chain: Array<string>): U
   return { sender: target, property: chain.join('.'), value: current };
 }
 
-export function chainToProps(chain: string | Function | string[], maxLength?: number) {
+export function chainToProps(chain: UntypedPropSelector, maxLength?: number) {
   let props: Array<string>;
 
   if (Array.isArray(chain)) {
