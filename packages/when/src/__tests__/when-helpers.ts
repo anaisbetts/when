@@ -39,7 +39,7 @@ describe('the notificationForProperty method', function() {
     expect(changes.length).toEqual(0);
   });
 
-  it('should notify through Updatables', async function() {
+  it.skip('should notify through Updatables', async function() {
     const input: Updatable<TestClass> = new Updatable(() => Promise.resolve(new TestClass()));
     await input.waitForValue();
 
@@ -102,7 +102,7 @@ describe('the notificationForPropertyChain method', function() {
     expect(changes.length).toEqual(0);
   });
 
-  it('should notify through Updatables', async function() {
+  it.skip('should notify through Updatables', async function() {
     const input: Updatable<TestClass> = new Updatable(() => Promise.resolve(new TestClass()));
     await input.waitForValue();
 

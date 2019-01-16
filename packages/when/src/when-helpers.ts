@@ -9,7 +9,6 @@ import isFunction = require('lodash.isfunction');
 import isObject = require('lodash.isobject');
 
 import * as LRU from 'lru-cache';
-import { Updatable } from './updatable';
 import { UntypedPropSelector } from './when';
 
 const proxyCache = new LRU(64);
@@ -21,22 +20,6 @@ export function notificationForProperty(
     before = false): Observable<UntypedChangeNotification> {
   if (!target || !isObject(target)) {
     return never();
-  }
-
-  if (target instanceof Updatable) {
-    if (prop === 'value') {
-      return target.pipe(
-        map((x: any) => ({ sender: target, property: prop, value: x })),
-      );
-    } else {
-      return target.pipe(
-        startWith(null),
-        switchMap(() => notificationForProperty(target.value, prop, before).pipe(
-          startWith({sender: target, property: prop, value: target.value[prop]}),
-        )),
-        skip(2),
-      );
-    }
   }
 
   if (!target || !(prop in target)) {
@@ -57,18 +40,13 @@ export function notificationForPropertyChain(target: any, props: string[], befor
     return notificationForProperty(target, props[0], before);
   }
 
-  let toSkip = 1;
-  if (isObject(target) && target instanceof Updatable && props[0] === 'value') {
-    toSkip++;
-  }
-
   return notificationForProperty(target, props[0], before).pipe(
     startWith(target),
     switchMap((x: UntypedChangeNotification) => {
       if (!x || !x.value) { return never(); }
       const newTarget = x.value;
 
-      return notificationForPropertyChain(newTarget, props.slice(toSkip), before);
+      return notificationForPropertyChain(newTarget, props.slice(1), before);
     }));
 }
 
@@ -97,13 +75,6 @@ export class SelfDescribingProxyHandler implements ProxyHandler<Function> {
 
 export function fetchValueForPropertyChain(target: any, chain: Array<string>): UntypedChangeNotification | null {
   let current = target;
-  if (current instanceof Updatable && chain[0] !== 'value') {
-    try {
-      current = current.value;
-    } catch (_e) {
-      return null;
-    }
-  }
 
   for (let i = 0; i < chain.length; i++) {
     try {
@@ -121,14 +92,6 @@ export function fetchValueForPropertyChain(target: any, chain: Array<string>): U
       return (i === chain.length - 1) ?
         { sender: target, property: chain[i], value: current } :
         null;
-    }
-
-    if (current instanceof Updatable && chain[i + 1] !== 'value') {
-      try {
-        current = current.value;
-      } catch (_e) {
-        return null;
-      }
     }
   }
 

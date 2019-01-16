@@ -9,7 +9,6 @@ import isObject = require('lodash.isobject');
 // tslint:disable-next-line:no-require-imports
 import isEqual = require('lodash.isequal');
 
-import { Updatable } from './updatable';
 import { chainToProps, fetchValueForPropertyChain, notificationForProperty } from './when-helpers';
 
 export function whenPropertyInternal(
@@ -60,27 +59,15 @@ export function observableForPropertyChain(
 
   const firstProp = props[0];
   let start = notificationForProperty(target, firstProp, before);
-  let isUpdatable = false;
 
   if (isObject(target) && firstProp in target) {
-    let val = target[firstProp];
-
-    if (isObject(val) && (val instanceof Updatable)) {
-      isUpdatable = true;
-      val = val.value;
-    }
-
     start = start.pipe(
-      startWith({ sender: target, property: firstProp, value: val }));
+      startWith({ sender: target, property: firstProp, value: target[firstProp] }));
   }
 
   if (props.length === 1) {
     return start.pipe(
       distinctUntilChanged((x, y) => isEqual(x.value, y.value)));
-  }
-
-  if (isUpdatable && props[1] === 'value') {
-    props.splice(1, 1);
   }
 
   // target.foo
