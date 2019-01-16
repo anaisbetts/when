@@ -6,7 +6,7 @@ import isEqual = require('lodash.isequal');
 
 import { MergeStrategy, Updatable } from './updatable';
 import { PropSelector, SendingPropSelector } from './when';
-import { chainToProps } from './when-helpers';
+import { propertySelectorToNames } from './when-helpers';
 
 const d = debug('when:model');
 
@@ -43,7 +43,7 @@ export class Model {
 }
 export function notifyFor<T extends Model>(target: T, ...properties: Array<SendingPropSelector<T>>) {
     const proto = Object.getPrototypeOf(target);
-    const names = properties.map(x => chainToProps(x, 1)[0]);
+    const names = properties.map(x => propertySelectorToNames(x, 1)[0]);
 
     for (const prop of names) {
       if (prop in proto) return;
@@ -62,7 +62,7 @@ export function lazyFor<TModel extends Model, TVal>(
     factory?: () => (Promise<TVal> | Observable<TVal>),
     strategy?: MergeStrategy) {
   const proto = Object.getPrototypeOf(target);
-  const [name] = chainToProps(property, 1);
+  const [name] = propertySelectorToNames(property, 1);
   const backingStoreName = `__${name}_Updatable__`;
 
   if (backingStoreName in proto) return;
@@ -77,7 +77,7 @@ export function toProperty<TModel extends Model, TVal>(
     property: PropSelector<TModel, TVal>,
     input: Observable<TVal>,
     setter?: ((x: TVal) => void)) {
-  const [name] = chainToProps(property, 1);
+  const [name] = propertySelectorToNames(property, 1);
   const obsPropertyKey: string = `___${name}_Observable`;
 
   if (obsPropertyKey in target) {
@@ -96,7 +96,7 @@ export function toProperty<TModel extends Model, TVal>(
 }
 
 export function invalidate<T extends Model>(target: T, property: SendingPropSelector<T>) {
-  const [name] = chainToProps(property, 1);
+  const [name] = propertySelectorToNames(property, 1);
   const obsPropertyKey: string = `___${name}_Observable`;
 
   if (target[obsPropertyKey] instanceof Updatable) {

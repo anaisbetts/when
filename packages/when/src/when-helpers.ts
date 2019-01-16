@@ -83,7 +83,7 @@ export function fetchValueForPropertyChain(target: any, chain: Array<string>): U
   return { sender: target, property: chain.join('.'), value: current };
 }
 
-export function chainToProps(chain: UntypedPropSelector, maxLength?: number) {
+export function propertySelectorToNames(chain: UntypedPropSelector, maxLength?: number) {
   let props: Array<string>;
 
   if (Array.isArray(chain)) {

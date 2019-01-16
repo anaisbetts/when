@@ -9,7 +9,7 @@ import isObject = require('lodash.isobject');
 // tslint:disable-next-line:no-require-imports
 import isEqual = require('lodash.isequal');
 
-import { chainToProps, fetchValueForPropertyChain, notificationForProperty } from './when-helpers';
+import { fetchValueForPropertyChain, notificationForProperty, propertySelectorToNames } from './when-helpers';
 
 export function whenPropertyInternal(
     target: any,
@@ -47,7 +47,7 @@ export function getValue<T, TRet>(
 export function getValue(
     target: any,
     accessor: UntypedPropSelector): UntypedChangeNotification | null {
-  const propChain = chainToProps(accessor);
+  const propChain = propertySelectorToNames(accessor);
   return fetchValueForPropertyChain(target, propChain);
 }
 
@@ -55,7 +55,7 @@ export function observableForPropertyChain(
     target: any,
     chain: UntypedPropSelector,
     before = false): Observable<UntypedChangeNotification> {
-  const props = chainToProps(chain);
+  const props = propertySelectorToNames(chain);
 
   const firstProp = props[0];
   let start = notificationForProperty(target, firstProp, before);

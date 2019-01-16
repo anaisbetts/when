@@ -7,3 +7,4 @@ export { MergeStrategy, Updatable } from './updatable';
 export {
   getValue, when, whenProperty,
   PropSelector, SendingPropSelector, UntypedPropSelector } from './when';
+export { propertySelectorToNames } from './when-helpers';
