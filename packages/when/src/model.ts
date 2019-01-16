@@ -66,13 +66,17 @@ export function lazyFor<TModel extends Model, TVal>(
   const backingStoreName = `__${name}_Updatable__`;
 
   if (backingStoreName in proto) return;
-  toProperty(target, property, new Updatable(factory, strategy));
+  const upd = new Updatable(factory, strategy);
+  toProperty(target, property, upd, (newVal: any) => {
+    upd.next(newVal);
+  });
 }
 
 export function toProperty<TModel extends Model, TVal>(
     target: TModel,
     property: PropSelector<TModel, TVal>,
-    input: Observable<TVal>) {
+    input: Observable<TVal>,
+    setter?: ((x: TVal) => void)) {
   const [name] = chainToProps(property, 1);
   const obsPropertyKey: string = `___${name}_Observable`;
 
@@ -80,11 +84,15 @@ export function toProperty<TModel extends Model, TVal>(
     throw new Error("Calling toProperty twice on the same property isn't supported");
   }
 
-  enablePropertyAsObservable(target, name);
+  enablePropertyAsObservable(target, name, setter);
 
   target[obsPropertyKey] = input;
-  // tslint:disable-next-line:no-unused-expression
-  target[name];
+  if (!setter) {
+    // NB: Cause subscription to happen by calling the property's getter
+
+    // tslint:disable-next-line:no-unused-expression
+    target[name];
+  }
 }
 
 export function invalidate<T extends Model>(target: T, property: SendingPropSelector<T>) {
@@ -128,10 +136,15 @@ function getNotifyDescriptorsForProperty(name: string, descriptor: PropertyDescr
   return ret;
 }
 
-function enablePropertyAsObservable(target: Model, propertyKey: string): void {
+function enablePropertyAsObservable(target: Model, propertyKey: string, setter?: ((v: any) => void)): void {
   const obsPropertyKey: string = `___${propertyKey}_Observable`;
   const valPropertyKey: string = `___${propertyKey}_Latest`;
   const subPropertyKey: string = `___${propertyKey}_Subscription`;
+  const errPropertyKey: string = `___${propertyKey}_Error`;
+
+  setter = setter || (() => {
+    throw new Error(`Cannot set '${propertyKey}' on ${target.constructor.name}: Observable properties are read-only`);
+  });
 
   if (obsPropertyKey in target) { return; }
 
@@ -155,7 +168,7 @@ function enablePropertyAsObservable(target: Model, propertyKey: string): void {
             this.changed.next({sender: target, property: propertyKey, value: this[valPropertyKey]});
           }, (e) => {
             d(`ToProperty on key ${propertyKey} failed! Last value was ${JSON.stringify(this[valPropertyKey])}`);
-            setTimeout(() => { throw e; }, 10);
+            this[errPropertyKey] = e;
           }, () => {
             d(`Observable for ${propertyKey} completed!`);
           }));
@@ -169,10 +182,12 @@ function enablePropertyAsObservable(target: Model, propertyKey: string): void {
         this.innerDisp.add(this[subPropertyKey]);
       }
 
+      if (this[errPropertyKey]) {
+        throw this[errPropertyKey];
+      }
+
       return this[valPropertyKey];
     },
-    set: () => {
-      throw new Error(`Cannot set '${propertyKey}' on ${target.constructor.name}: Observable properties are read-only`);
-    },
+    set: setter,
   });
 }

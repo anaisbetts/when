@@ -1,8 +1,7 @@
-import { concat, never, Observable, of, Subject, throwError } from 'rxjs';
+import { concat, never, Observable, of, Subject } from 'rxjs';
 import { distinctUntilChanged, map, switchAll } from 'rxjs/operators';
 
 import { createCollection } from '../custom-operators';
-import { Updatable } from '../updatable';
 import { getValue, observableForPropertyChain, when, whenProperty } from '../when';
 
 import { TestClass } from '../test-support';
@@ -18,32 +17,12 @@ describe('the getValue method', function() {
     expect(getValue(fixture, f => f.bar)!.value).toEqual(10);
   });
 
-  it.skip('should fetch through Updatable values', function() {
+  it('should fetch through lazy values', function() {
     const fixture = new TestClass();
-    expect(getValue(fixture, f => f.updatableFoo)!.value).toEqual(6);
+    expect(getValue(fixture, f => f.lazyFoo)!.value).toEqual(6);
 
-    fixture.updatableFoo.next(10);
-    expect(getValue(fixture, f => f.updatableFoo)!.value).toEqual(10);
-  });
-
-  it.skip('should fetch through Updatable values even when explicitly requested', function() {
-    const fixture = new TestClass();
-    expect(getValue(fixture, f => f.updatableFoo.value)!.value).toEqual(6);
-
-    fixture.updatableFoo.next(10);
-    expect(getValue(fixture, f => f.updatableFoo.value)!.value).toEqual(10);
-  });
-
-  it.skip('should fetch through Updatable when its the first one', function() {
-    const fixture = new Updatable(() => of(new TestClass));
-
-    expect(getValue(fixture, (f: any) => f.updatableFoo)!.value).toEqual(6);
-  });
-
-  it.skip('should fetch through Updatable when its the first one even when explicitly requested', function() {
-    const fixture = new Updatable(() => of(new TestClass));
-
-    expect(getValue(fixture, f => f.value.updatableFoo)!.value).toEqual(6);
+    fixture.lazyFoo = 10;
+    expect(getValue(fixture, f => f.lazyFoo)!.value).toEqual(10);
   });
 
   it('should fail if it cant walk the entire property chain', function() {
@@ -60,11 +39,10 @@ describe('the getValue method', function() {
     expect(result).toBeNull();
   });
 
-  it.skip('should fail if walking the chain throws in an Updatable', function() {
+  it('should fail if walking the chain throws in an Updatable', function() {
     const fixture = new TestClass();
-    fixture.updatableFoo.nextAsync(throwError(new Error('die')));
 
-    const result = getValue(fixture, f => f.updatableFoo);
+    const result = getValue(fixture, f => f.lazyExplodingFoo);
     expect(result).toBeNull();
   });
 });
@@ -212,14 +190,14 @@ describe('the untyped whenProperty method', function() {
     expect(result[2]).toEqual(2 * 10 + 42);
   });
 
-  it.skip('should reach through Updatables', function() {
+  it('should reach through lazy values', function() {
     const fixture = new TestClass();
-    const result = createCollection(whenProperty(fixture, 'updatableFoo'));
+    const result = createCollection(whenProperty(fixture, 'lazyFoo'));
 
     expect(result.length).toEqual(1);
     expect(result[0].value).toEqual(6);
 
-    fixture.updatableFoo.next(12);
+    fixture.lazyFoo = 12;
     expect(result.length).toEqual(2);
     expect(result[1].value).toEqual(12);
   });
@@ -267,14 +245,14 @@ describe('the typed whenProperty method', function() {
     expect(result[2]).toEqual(2 * 10 + 42);
   });
 
-  it.skip('should reach through Updatables', function() {
+  it('should reach through Updatables', function() {
     const fixture = new TestClass();
-    const result = createCollection(whenProperty(fixture, x => x.updatableFoo));
+    const result = createCollection(whenProperty(fixture, x => x.lazyFoo));
 
     expect(result.length).toEqual(1);
     expect(result[0].value).toEqual(6);
 
-    fixture.updatableFoo.next(12);
+    fixture.lazyFoo = 12;
     expect(result.length).toEqual(2);
     expect(result[1].value).toEqual(12);
   });
@@ -320,14 +298,14 @@ describe('the untyped when method', function() {
     expect(result[2]).toEqual(2 * 10 + 42);
   });
 
-  it.skip('should reach through Updatables', function() {
+  it('should reach through Updatables', function() {
     const fixture = new TestClass();
-    const result = createCollection(when(fixture, 'updatableFoo'));
+    const result = createCollection(when(fixture, 'lazyFoo'));
 
     expect(result.length).toEqual(1);
     expect(result[0]).toEqual(6);
 
-    fixture.updatableFoo.next(12);
+    fixture.lazyFoo = 12;
     expect(result.length).toEqual(2);
     expect(result[1]).toEqual(12);
   });
@@ -372,30 +350,27 @@ describe('the typed when method', function() {
     expect(result[2]).toEqual(2 * 10 + 42);
   });
 
-  it.skip('should reach through Updatables', function() {
+  it('should reach through Updatables', function() {
     const fixture = new TestClass();
-    const result = createCollection(when(fixture, x => x.updatableFoo));
+    const result = createCollection(when(fixture, x => x.lazyFoo));
 
     expect(result.length).toEqual(1);
     expect(result[0]).toEqual(6);
 
-    fixture.updatableFoo.next(12);
+    fixture.lazyFoo = 12;
     expect(result.length).toEqual(2);
     expect(result[1]).toEqual(12);
   });
 
-  it.skip('should reach deeply through Updatables', function() {
+  it('should reach deeply through Lazy properties', function() {
     const fixture = new TestClass();
-    const result = createCollection(when(fixture, x => x.updatableTodo.value!.title));
-    const updatableResult = createCollection(fixture.updatableTodo);
+    const result = createCollection(when(fixture, x => x.lazyTodo!.title));
 
-    expect(result.length).toEqual(0);
-    expect(updatableResult.length).toEqual(1);
-
-    fixture.updatableTodo.next({ title: 'foo', description: 'bar', completed: false });
-
-    expect(updatableResult.length).toEqual(2);
     expect(result.length).toEqual(1);
-    expect(result[0]).toEqual('foo');
+
+    fixture.lazyTodo = { title: 'foo', description: 'bar', completed: false };
+
+    expect(result.length).toEqual(2);
+    expect(result[1]).toEqual('foo');
   });
 });

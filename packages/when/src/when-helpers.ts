@@ -1,5 +1,5 @@
 import { never, Observable } from 'rxjs';
-import { filter, map, skip, startWith, switchMap } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 
 import { Model, UntypedChangeNotification } from './model';
 
@@ -33,21 +33,6 @@ export function notificationForProperty(
   }
 
   return never();
-}
-
-export function notificationForPropertyChain(target: any, props: string[], before = false): Observable<any> {
-  if (props.length === 1) {
-    return notificationForProperty(target, props[0], before);
-  }
-
-  return notificationForProperty(target, props[0], before).pipe(
-    startWith(target),
-    switchMap((x: UntypedChangeNotification) => {
-      if (!x || !x.value) { return never(); }
-      const newTarget = x.value;
-
-      return notificationForPropertyChain(newTarget, props.slice(1), before);
-    }));
 }
 
 // tslint:disable-next-line:no-empty

@@ -1,7 +1,7 @@
 import { merge, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { Model } from '../model';
+import { Model, toProperty } from '../model';
 
 import { TestClass } from '../test-support';
 
@@ -45,8 +45,8 @@ export class ToPropertyTwiceIsBad extends Model {
   constructor() {
     super();
 
-    this.toProperty(of(5), 'derived');
-    this.toProperty(of(42), 'derived');
+    toProperty(this, x => x.derived, of(5));
+    toProperty(this, x => x.derived, of(42));
   }
 }
 

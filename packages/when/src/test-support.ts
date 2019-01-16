@@ -1,7 +1,7 @@
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { Model, toProperty, notifyFor, lazyFor } from './model';
+import { lazyFor, Model, notifyFor, toProperty } from './model';
 
 interface TodoItem {
   title: string;
@@ -16,6 +16,7 @@ export class TestClass extends Model {
   baz: number;
   arrayFoo: number[];
   lazyFoo: number;
+  lazyExplodingFoo: number;
   lazyTodo: TodoItem | null;
 
   derived: number;
@@ -31,7 +32,9 @@ export class TestClass extends Model {
     this.someSubject = new Subject();
 
     notifyFor(this, x => x.foo, x => x.bar, x => x.arrayFoo);
-    lazyFor(this, x => x.lazyFoo, () => of(25));
+    lazyFor(this, x => x.lazyFoo, () => of(6));
+    lazyFor(this, x => x.lazyExplodingFoo, () => throwError(new Error('die')));
+    lazyFor(this, x => x.lazyTodo, () => of({ title: 'Hi', description: 'A Thing', completed: false }));
 
     toProperty(this, x => x.derived, of(42));
 
