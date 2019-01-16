@@ -44,11 +44,11 @@ class Toaster : Model {
   brandName: string;
 
   constructor() {
-    this.propertyShouldNotify('toastCount');
+    notifyFor(this, x => x.toastCount);
   }
 }
 
-// Observing properties with @notify == works!
+// Observing properties with notifyFor == works!
 when(someToaster.toastCount).filter(x => x > 0).subscribe("Toast is happening!");
 someToaster.toastCount++;
 >> Toast is Happening
