@@ -1,6 +1,6 @@
 {
   "name": "@whenjs/when",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "scripts": {
     "compile": "git clean -xdf ./lib && tsc -p . --outDir ./lib",
     "lint": "npm run compile && tslint -c ./tslint.json -p ./tsconfig.json \"src/**/*.ts\"",
