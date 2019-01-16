@@ -90,6 +90,7 @@ export function observableForPropertyChain(
  */
 
 export type UntypedPropSelector = Function | string | string[];
+export type SendingPropSelector<TIn> = ((t: TIn) => any) | string | string[];
 export type PropSelector<TIn, TOut> = ((t: TIn) => TOut) | string | string[];
 
 export function when<TSource, TRet>(

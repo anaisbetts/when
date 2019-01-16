@@ -1,8 +1,7 @@
 import { of, Subject } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { Model } from './model';
-import { Updatable } from './updatable';
+import { Model, toProperty, notifyFor, lazyFor } from './model';
 
 interface TodoItem {
   title: string;
@@ -16,8 +15,8 @@ export class TestClass extends Model {
   bar: number | TestClass;
   baz: number;
   arrayFoo: number[];
-  updatableFoo: Updatable<number>;
-  updatableTodo: Updatable<TodoItem | null>;
+  lazyFoo: number;
+  lazyTodo: TodoItem | null;
 
   derived: number;
   subjectDerived: number;
@@ -31,16 +30,18 @@ export class TestClass extends Model {
     this.arrayFoo = [1];
     this.someSubject = new Subject();
 
-    this.notifyFor('foo', 'bar', 'arrayFoo');
+    notifyFor(this, x => x.foo, x => x.bar, x => x.arrayFoo);
+    lazyFor(this, x => x.lazyFoo, () => of(25));
 
-    this.toProperty(of(42), 'derived');
+    toProperty(this, x => x.derived, of(42));
 
-    this.toProperty(
+    toProperty(
+      this,
+      x => x.subjectDerived,
       this.someSubject.pipe(
         map((x) => x * 10),
         startWith(0),
       ),
-      'subjectDerived',
     );
   }
 }

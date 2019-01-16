@@ -5,7 +5,7 @@ import * as debug from 'debug';
 import isEqual = require('lodash.isequal');
 
 import { MergeStrategy, Updatable } from './updatable';
-import { UntypedPropSelector } from './when';
+import { PropSelector, SendingPropSelector } from './when';
 import { chainToProps } from './when-helpers';
 
 const d = debug('when:model');
@@ -33,8 +33,16 @@ export class Model {
     this.innerDisp = new Subscription();
   }
 
-  notifyFor(...properties: Array<UntypedPropSelector>) {
-    const proto = Object.getPrototypeOf(this);
+  unsubscribe() {
+    this.innerDisp.unsubscribe();
+  }
+
+  addTeardown(teardown: ISubscription | Function | void) {
+    this.innerDisp.add(teardown);
+  }
+}
+export function notifyFor<T extends Model>(target: T, ...properties: Array<SendingPropSelector<T>>) {
+    const proto = Object.getPrototypeOf(target);
     const names = properties.map(x => chainToProps(x, 1)[0]);
 
     for (const prop of names) {
@@ -48,50 +56,45 @@ export class Model {
     }
   }
 
-  lazyFor<T>(
-      property: UntypedPropSelector,
-      factory?: () => (Promise<T>|Observable<T>),
-      strategy?: MergeStrategy) {
-    const proto = Object.getPrototypeOf(this);
-    const [name] = chainToProps(property, 1);
-    const backingStoreName = `__${name}_Updatable__`;
+export function lazyFor<TModel extends Model, TVal>(
+    target: TModel,
+    property: PropSelector<TModel, TVal>,
+    factory?: () => (Promise<TVal> | Observable<TVal>),
+    strategy?: MergeStrategy) {
+  const proto = Object.getPrototypeOf(target);
+  const [name] = chainToProps(property, 1);
+  const backingStoreName = `__${name}_Updatable__`;
 
-    if (backingStoreName in proto) return;
-    this.toProperty(new Updatable(factory, strategy), property);
+  if (backingStoreName in proto) return;
+  toProperty(target, property, new Updatable(factory, strategy));
+}
+
+export function toProperty<TModel extends Model, TVal>(
+    target: TModel,
+    property: PropSelector<TModel, TVal>,
+    input: Observable<TVal>) {
+  const [name] = chainToProps(property, 1);
+  const obsPropertyKey: string = `___${name}_Observable`;
+
+  if (obsPropertyKey in target) {
+    throw new Error("Calling toProperty twice on the same property isn't supported");
   }
 
-  toProperty<T>(input: Observable<T>, property: UntypedPropSelector) {
-    const [name] = chainToProps(property, 1);
-    const obsPropertyKey: string = `___${name}_Observable`;
+  enablePropertyAsObservable(target, name);
 
-    if (obsPropertyKey in this) {
-      throw new Error("Calling toProperty twice on the same property isn't supported");
-    }
+  target[obsPropertyKey] = input;
+  // tslint:disable-next-line:no-unused-expression
+  target[name];
+}
 
-    enablePropertyAsObservable(this, name);
+export function invalidate<T extends Model>(target: T, property: SendingPropSelector<T>) {
+  const [name] = chainToProps(property, 1);
+  const obsPropertyKey: string = `___${name}_Observable`;
 
-    this[obsPropertyKey] = input;
-    // tslint:disable-next-line:no-unused-expression
-    this[name];
-  }
-
-  invalidate(property: UntypedPropSelector) {
-    const [name] = chainToProps(property, 1);
-    const obsPropertyKey: string = `___${name}_Observable`;
-
-    if (this[obsPropertyKey] instanceof Updatable) {
-      this[obsPropertyKey].invalidate();
-    } else {
-      this[name] = null;
-    }
-  }
-
-  unsubscribe() {
-    this.innerDisp.unsubscribe();
-  }
-
-  addTeardown(teardown: ISubscription | Function | void) {
-    this.innerDisp.add(teardown);
+  if (target[obsPropertyKey] instanceof Updatable) {
+    target[obsPropertyKey].invalidate();
+  } else {
+    target[name] = null;
   }
 }
 
