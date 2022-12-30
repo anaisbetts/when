@@ -37,7 +37,7 @@
     "@types/lodash.isfunction": "^3.0.4",
     "@types/lodash.isobject": "^3.0.4",
     "@types/lru-cache": "4.1.1",
-    "jest": "^23.6.0",
+    "jest": "^29.3.1",
     "ts-jest": "^23.10.5",
     "ts-node": "7.0.1",
     "tslint": "^5.12.1",
